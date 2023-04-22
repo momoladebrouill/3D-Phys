@@ -45,7 +45,7 @@ let make_them_fall cubes =
         match cs with
         [] -> acc
         | t::q -> let tx,ty,tz = vec3_to_tuple t in 
-          aux q ((if (List.exists (is_at (tx -. 1.0) ty tz) cubes && tx > 1.) then t else Vector3.create (tx -. 1.) ty tz )::acc)
+          aux q ((if (List.exists (is_at (tx -. 1.0) ty tz) cubes || tx < 1.) then t else Vector3.create (tx -. 1.) ty tz )::acc)
     in aux cubes []
  
 let rec loop s =
@@ -59,7 +59,7 @@ let rec loop s =
          Camera3D.set_position s.camera (r3_to_vec3 s.pos);
          loop {
              camera = s.camera;
-             cubes = if is_key_pressed Key.Space then (ceil_vec3 (r3_to_vec3 s.pos))::s.cubes else s.cubes;
+             cubes = if is_key_pressed Key.Space then (ceil_vec3 (r3_to_vec3 s.pos))::s.cubes else make_them_fall s.cubes |> List.rev;
              pos = {
                  phi = s.pos.phi +. (if is_key_down Key.Up then 0.01 else if is_key_down Key.Down then -0.01 else 0.);
                  theta = s.pos.theta +. (if is_key_down Key.Left then 0.01 else if is_key_down Key.Right then -0.01 else 0.);
