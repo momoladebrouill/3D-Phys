@@ -2,7 +2,7 @@ open Raylib
 let k = 120
 let w = 16*k
 let h = 9*k
-let floor_y = float_of_int (h-400)
+let floor_y = float_of_int (h+5200)
 
 
 let dt = 0.1
@@ -14,6 +14,10 @@ let mass = 10.0
 let n = 20 (*nombre de particules*)
 
 type vec = float * float
+
+let w_blob = 10
+let h_blob = 10
+let n = w_blob * h_blob
 
 type point = {
     pos : vec;
@@ -29,11 +33,10 @@ let setup () =
   Random.self_init (); 
   Raylib.init_window w h "vichy";
   Raylib.set_target_fps 60;
-  let r = 250. in 
   (Array.init n (fun i -> 
        {
-         pos = (float_of_int (w/2) +. r *. cos(foi i /. foi n *. 6.28)),(float_of_int (h/2)+. r *.  sin (foi i/. foi n *. 6.28));
-         vit = 50.*.(Random.float 1.0 -. 0.5),50.*.(Random.float 1.0 -. 0.5);
+         pos = (float_of_int (w/2 + 100*(i mod w_blob))),(float_of_int (h/2 + 100*i/h_blob));
+         vit = 0.*.(Random.float 1.0 -. 0.5),0.*.(Random.float 1.0 -. 0.5);
          col = Random.float 50.
      })), 0
 
@@ -47,29 +50,33 @@ let f_ressort (xa,ya) (xb,yb) l0 k =
    let theta = atan2 (ya -. yb) (xa-.xb) in
    let el = (cos theta,sin theta) 
    in el #* (k*.(l-.l0))
-        
+
+let linked_to i =
+  let east = [i+1,1.0;i+w_blob+1,1.41;i-w_blob+1,1.41] in
+  let west = [i-1,1.0;i+w_blob-1,1.41;i-w_blob-1,1.41] in
+  let l = (i-w_blob,1.0)::(i+w_blob,1.0)::(if i mod w_blob =  0 then east else if i mod w_blob = w_blob-1 then west else east @ west)
+  in List.filter (fun (j,_) -> j >= 0 && j < n) l
+
 let bilan_des_forces (x,y) (vx,vy) (cx,cy) i l=
   [
     (0.0,0.0), Color.green; (*champs de pesanteur*)  
-    (vx,vy) #* (-1.0*.0.9), Color.blue; (*force de frottement sur surface*)
-    f_ressort (cx,cy) (x,y)  50.0 0.01, Color.yellow; (*force elsatique avec le centre*)
-    f_ressort l.(next i).pos (x,y) 10.0 0.05, Color.purple; (*force elastique avec le n+1 *)
-    f_ressort l.(prev i).pos (x,y) 10.0 0.05, Color.purple (*force elastique avec le n-1 *)
-  ] 
+    (vx,vy) #* (-1.0*.0.5), Color.blue; (*force de frottement sur surface*)
+    f_ressort (cx,cy) (x,y)  50.0 0.01, Color.yellow (*force elsatique avec le centre*)
+   ] @ List.map (fun (i,d) -> f_ressort l.(i).pos (x,y) (100.0*.d) 0.5, Color.purple) (linked_to i) (*force elastique avec les autres *)
      
 let rec loop (l,t) =
   if Raylib.window_should_close () then Raylib.close_window () else 
   clear_background Color.black;
   let c = ((float_of_int (w/2) +. 200.0*.cos ((float_of_int t)/.100.0) ), (float_of_int (h/2)) +. 200.0*.sin ((float_of_int t)/.100.0) ) in 
-  let c = (float_of_int (w/2) , float_of_int (h/2)) in 
+  let c = (float_of_int (w/2) , float_of_int (0)) in 
   begin_drawing ();
   let cx,cy = c in
     draw_circle (int_of_float cx) (int_of_float cy) 5.0 Color.white;
     draw_rectangle 0 (int_of_float floor_y) w (h-(int_of_float floor_y)) Color.white; 
     Array.iteri (fun i s ->
       let x,y = s.pos in
-      draw_line (int_of_float cx) (int_of_float cy) (int_of_float x) (int_of_float y) Color.raywhite;
-      draw_line (int_of_float (fst l.(next i).pos)) (int_of_float (snd (l.(next i).pos))) (int_of_float x) (int_of_float y) Color.gray;
+      (*draw_line (int_of_float cx) (int_of_float cy) (int_of_float x) (int_of_float y) Color.raywhite;*)
+      (*draw_line (int_of_float (fst l.(next i).pos)) (int_of_float (snd (l.(next i).pos))) (int_of_float x) (int_of_float y) Color.gray;*)
       draw_rectangle (int_of_float x - 5) (int_of_float y - 5) 10 10 (Raylib.color_from_hsv s.col 1.0 1.0);
       
       let f = bilan_des_forces s.pos s.vit c i l in
