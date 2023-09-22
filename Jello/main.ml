@@ -32,7 +32,7 @@ let foi = float_of_int
 let setup () =
   Random.self_init (); 
   Raylib.init_window w h "vichy";
-  Raylib.set_target_fps 60;
+  Raylib.set_target_fps 360;
   (Array.init n (fun i -> 
        {
          pos = (float_of_int (w/2 + 100*(i mod w_blob))),(float_of_int (h/2 + 100*i/h_blob));
@@ -60,15 +60,15 @@ let linked_to i =
 let bilan_des_forces (x,y) (vx,vy) (cx,cy) i l=
   [
     (0.0,0.0), Color.green; (*champs de pesanteur*)  
-    (vx,vy) #* (-1.0*.0.5), Color.blue; (*force de frottement sur surface*)
+    (vx,vy) #* (-1.0*.0.1), Color.blue; (*force de frottement sur surface*)
     f_ressort (cx,cy) (x,y)  50.0 0.01, Color.yellow (*force elsatique avec le centre*)
    ] @ List.map (fun (i,d) -> f_ressort l.(i).pos (x,y) (100.0*.d) 0.5, Color.purple) (linked_to i) (*force elastique avec les autres *)
      
 let rec loop (l,t) =
   if Raylib.window_should_close () then Raylib.close_window () else 
   clear_background Color.black;
-  let c = ((float_of_int (w/2) +. 200.0*.cos ((float_of_int t)/.100.0) ), (float_of_int (h/2)) +. 200.0*.sin ((float_of_int t)/.100.0) ) in 
-  let c = (float_of_int (w/2) , float_of_int (0)) in 
+  let c = ((float_of_int (w/2) +. 100.0*.cos ((float_of_int t)/.100.0) ), (float_of_int (h/2)) +. 100.0*.sin ((float_of_int t)/.100.0) ) in 
+ (* let c = (float_of_int (w/2) , float_of_int (h/2)) in *)
   begin_drawing ();
   let cx,cy = c in
     draw_circle (int_of_float cx) (int_of_float cy) 5.0 Color.white;
