@@ -7,14 +7,14 @@ let h = 9*k
 
 (*Constantes*)
 let floor_y = float_of_int (h+5200) (*sol*)
-let dt = 0.01 
+let dt = 0.1 
 let mass = 10.0 (*masses individuelles des particules*)
 let foi = float_of_int
 let iof = int_of_float
 
 (*Taille du blob carré*)
-let w_blob = 10
-let h_blob = 10
+let w_blob = 9
+let h_blob = 9
 let n = w_blob * h_blob
 
 type vec = 
@@ -29,6 +29,7 @@ type point = {
 type status = {
     t : int; (*temps*)
     l : point array;
+    z : float; (*zoom*) 
     shift : vec; (*shift de la cam*)
 }
 
@@ -60,11 +61,11 @@ let linked_to i = (*to make a square*)
 
 let bilan_des_forces pos vit c i l=
     [
-        (0.0,0.0), Color.green; (*champs de pesanteur*)  
-        vit *$ (-0.1), Color.blue; (*force de frottement sur surface*)
-        attrac c pos mass 50.0, Color.yellow (*force newtonienne avec le centre*)
-  ] @ List.map (fun (i,d) -> f_ressort l.(i).pos pos (100.0*.d) 1.1, Color.purple) (linked_to i) (*force elastique avec les autres *)
-  
+        (0.0,0.1), Color.green; (*champs de pesanteur*)  
+        vit *$ (-10.0), Color.blue; (*force de frottement sur surface*)
+        attrac c pos mass 10000000.0, Color.yellow (*force newtonienne avec le centre*)
+  ] @ List.map (fun (i,d) -> f_ressort l.(i).pos pos (1000.0*.d) 0.5, Color.purple) (linked_to i) (*force elastique avec les autres *)
+ 
 let rec loop status =
   if Raylib.window_should_close () then Raylib.close_window () else 
   let t,l,shift = status.t,status.l,status.shift in
@@ -76,17 +77,19 @@ let rec loop status =
   
   begin_drawing ();
   let cx,cy = ((float_of_int (w/2) +. ray*.cos ((float_of_int t)/.100.0) ), (float_of_int (h/2)) +. ray*.sin ((float_of_int t)/.100.0) ) in 
+  let px x =
+      (px +. cx 
   let sx,sy = shift in
-    draw_circle (iof (cx +. sx)) (iof (cy +. sy)) 5.0 Color.white;
-    draw_rectangle 0 (iof (floor_y +. sy)) w (h-(iof (floor_y +. sy))) Color.white; 
+    draw_circle (iof (cx +. sx) *. z) (iof (cy +. sy) *. z) 5.0 Color.white;
+    draw_rectangle 0 (iof (floor_y +. sy) *. z) w (h-(iof (floor_y +. sy) *. z)) Color.white; 
     Array.iteri (fun i s ->
         let x,y = s.pos +$ shift in
-          draw_rectangle (iof x - 5) (iof y - 5) 10 10 (Raylib.color_from_hsv s.col 1.0 1.0);
-          draw_text (string_of_float s.col) (iof x) (iof y) 20 Color.raywhite;
+          draw_rectangle ((iof x - 5) *. z) ((iof y - 5) *. z) 10 10 (Raylib.color_from_hsv s.col 1.0 1.0);
+          (*draw_text (string_of_float s.col) (iof x) (iof y) 20 Color.raywhite;*)
         let f = bilan_des_forces s.pos s.vit c i l in
         let fac_newt = 0.1 in
         List.iter (fun ((fx,fy),col) -> 
-           draw_line (iof x) (iof y) (iof (x+.fx*.fac_newt)) (iof (y+.fy*.fac_newt)) col) f) l; 
+           draw_line ((iof x)*.z) ((iof y)*.z) (iof (x+.fx*.fac_newt) *. z) (iof (y+.fy*.fac_newt) *. z) col) f) l; 
   end_drawing ();
 
   let vitesse = -50.0 in
@@ -100,22 +103,21 @@ let rec loop status =
   in
 
   let somme_des_forces i s  = List.fold_left (fun x (f,_) -> x +$ f ) zero (bilan_des_forces s.pos s.vit c i l) in
-  let f dt = (*bilan à l'instant t+dt*)
-      Array.mapi(fun  i p->
-        let f = somme_des_forces i p in
+  let f dt  = (*bilan à l'instant t+dt*)
+      Array.mapi (fun  i p->
         {
-            pos = p.pos +$  (p.vit *$ dt);
-            vit = p.vit +$  (f *$ (dt/.mass));
-            col = p.col *. dt;
-  })  
+            pos =  (p.vit *$ dt);
+            vit =  (somme_des_forces i p  *$ (dt/.mass));
+            col = 0.;
+        })  
     in (* RK4 : *)
-  let k1 = l *% dt in
-  let k2 = (f (dt/.2.) ( (k1 *% 0.5 ))) *% dt in
-  let k3 = (f (dt/.2.) ( (k2 *% 0.5))) *% dt in
-  let k4 = (f  dt      ( k3)) *% dt in
+  let k1 = (f 0. l ) *% dt  in
+  let k2 = (f (dt/.2.)  (l +% (k1 *% 0.5))) *% dt in
+  let k3 = (f (dt/.2.)  (l +% (k2 *% 0.5))) *% dt in
+  let k4 = (f  dt       (l +% k3)) *% dt in
   let l' = l +% (k1 *% (1./.6.)) +% (k2 *% (1./.3.)) +% (k3 *% (1./.3.)) +% (k4 *% (1./.6.)) in
 
-  loop {t = t+1; l = l'; shift = shift'}
+  loop {t = t+1; l = l'; shift = shift'; z = z +. (if is_key_down Key.Plus then 0.1 else 0) +. (if is_key_down Key.Minus then -0.1 else 0) }
 
 let setup () =
   Random.self_init (); 
@@ -125,8 +127,9 @@ let setup () =
       t = 0;
       l = Array.init n (fun i -> 
           {
-              pos = (float_of_int (w/2 + 100*(i mod w_blob))),(float_of_int (h/2 + 100*i/h_blob));
-              vit = 0.*.(Random.float 1.0 -. 0.5),0.*.(Random.float 1.0 -. 0.5);
+              pos = foi (w/2 + 100*(i mod w_blob - w_blob/2 )),
+                    (foi (h/2)) +. 100.0 *. (foi (i/h_blob - h_blob/2));
+              vit = zero;
               col = Random.float 50.
           });
       shift = zero;
