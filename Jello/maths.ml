@@ -19,6 +19,9 @@ let ps (a,b) (c,d) = a*.c +. b*.d
 let (+%) = Array.map2 (+$)
 let mult q = Array.map (fun t-> t *$ q)
 
+
+let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
+
 let abs_f x = if x < 0.0 then -.x else x
 
 let dist_square (xa,ya) (xb,yb) = (xa-.xb)**2.0 +. (ya-.yb)**2.0

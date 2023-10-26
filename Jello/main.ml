@@ -18,7 +18,7 @@ let to_points y y' st =
 (*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
 let f h y y' st = 
   let points = to_points y y' st in
-  Array.mapi (fun i p -> somme_vecs (bilan_des_forces p i points h st.k_ressort) *$ (1.0/.p.mass)) points 
+  Array.mapi (fun i p -> somme_forces (bilan_des_forces p i points h st.k_ressort) *$ (1.0/.p.mass)) points 
 
 let rk4 st = 
   let h =  dt in
@@ -37,12 +37,12 @@ let rk4 st =
 
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
+  let px (x,_) = iof (x *. st.z +. (fst st.shift)) in 
+  let py (_,y) = iof (y *. st.z +. (snd st.shift)) in
   let time_jumping = not (is_key_down Key.Space) in
   if time_jumping || st.t mod 30 = 0 then begin 
         (*affichage*)
   clear_background Color.black;
-  let px (x,_) = iof (x *. st.z +. (fst st.shift)) in 
-  let py (_,y) = iof (y *. st.z +. (snd st.shift)) in
     let posa = foi (-w), foi h in
     draw_rectangle (px posa) (py posa) ((foi (2*w))*.st.z |> iof) (500.0*.st.z |> iof)  Color.white; 
     Array.iteri (fun i s ->
@@ -55,12 +55,12 @@ let rec loop st =
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) col) f
         else if is_key_down Key.G then  (* l'accélération*)
           let f =  (bilan_des_forces s i st.l dt st.k_ressort) in
-          let end_force = s.pos +$ ((somme_vecs f) *$ (fac_newt*.st.z)) in 
+          let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange 
         (*dessin des ressorts*)  
         else
-          List.iter (fun (posb,fac) -> let d = dist pos st.l.(posb).pos  in
-          draw_line (px pos) (py pos) (px st.l.(posb).pos) (py st.l.(posb).pos) (Raylib.color_from_hsv 0.0 (abs_f (d -. d_eq*.fac)/.50.0) 1.0 )) (linked_to i)
+          List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
+          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) (Raylib.color_from_hsv 0.0 (abs_f (d -. d_eq*.fac)/.50.0) 1.0 )) (linked_to i)
     ) st.l;
 
   draw_text (string_of_float st.z ^
@@ -73,7 +73,7 @@ Space pour le saut temporel
   begin_drawing ();
   end_drawing ();
   end;
-  let vitesse = -1.0 in
+  let vitesse = -100.0 in
   let shift' = List.fold_left (+$) st.shift
       [
           if is_key_down Key.Up then 0.0,-.vitesse else zero; 
@@ -82,6 +82,9 @@ Space pour le saut temporel
           if is_key_down Key.Right then vitesse,0.0 else zero; 
      ] 
   in
+  let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
+  let ideal = foi (w/2),foi (h/2) in
+  let shift' = (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1)  in
   let l' = rk4 st in
   loop {
       t =st.t+1;
@@ -94,14 +97,14 @@ Space pour le saut temporel
 let setup () =
   Raylib.init_window w h "vichy";
   Raylib.set_target_fps 60;
-  let d_init_fac = 0.9 in
+  let d_init_fac = 0.8 in
   {
       t = 0;
       l = Array.init n (fun i -> 
           {
               pos = foi (w/2 + (iof (d_eq*.d_init_fac)) * (i mod w_blob - w_blob/2 )),
                     (foi (h/2)) +. d_eq*.d_init_fac *. (foi (i/h_blob - h_blob/2));
-              vit = (0.0,50.0);
+              vit = (0.0,0.0);
               mass = mass (*.(foi i)/.(foi n) *)
           });
       shift = zero;
