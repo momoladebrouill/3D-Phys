@@ -30,5 +30,5 @@ let bilan_des_forces s i l t k_ressort =
       ]) (linked_to i)) 
     in if snd (s.pos +$ (s.vit  *$ t)) > floor_y  then
          let f = somme_vecs l in (*RN*)
-          ((0.0, -.2.0*.(abs_f (snd f))), red)::l 
+          ((0.0, -.5.0*.(abs_f (snd f))), red)::l 
   else l  
