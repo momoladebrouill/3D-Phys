@@ -42,9 +42,9 @@ let rec loop st =
   let time_jumping = not (is_key_down Key.Space) in
   if time_jumping || st.t mod 30 = 0 then begin 
         (*affichage*)
-  clear_background Color.black;
+  clear_background Color.darkblue;
     let posa = foi (-w), foi h in
-    draw_rectangle (px posa) (py posa) ((foi (2*w))*.st.z |> iof) (500.0*.st.z |> iof)  Color.white; 
+    draw_rectangle (px posa) (py posa) ((foi (2*w))*.st.z |> iof) (500.0*.st.z |> iof)  Color.gray; 
     Array.iteri (fun i s ->
         (*dessin des forces*)
         let fac_newt = 0.1 in
@@ -68,6 +68,7 @@ let rec loop st =
 F pour le mode forces
 Arrows pour le deplacement
 Space pour le saut temporel
+Q pour recentrer
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
     ) 0 0 20 Color.raywhite;
   begin_drawing ();
@@ -84,7 +85,7 @@ Space pour le saut temporel
   in
   let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
   let ideal = foi (w/2),foi (h/2) in
-  let shift' = (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1)  in
+  let shift' = if is_key_down Key.A then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
   let l' = rk4 st in
   loop {
       t =st.t+1;
