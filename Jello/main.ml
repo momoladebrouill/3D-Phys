@@ -2,6 +2,7 @@ open Raylib
 open Force
 open Maths  
 open Constantes
+open Rk4
 
 type status = {
     t : int; (*temps*)
@@ -11,29 +12,6 @@ type status = {
     k_ressort : float;
 }
 
-
-let to_points y y' st =
-  Array.init n (fun i-> {pos=y.(i); vit = y'.(i); mass = st.l.(i).mass}) 
-
-(*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
-let f h y y' st = 
-  let points = to_points y y' st in
-  Array.mapi (fun i p -> somme_forces (bilan_des_forces p i points h st.k_ressort) *$ (1.0/.p.mass)) points 
-
-let rk4 st = 
-  let h =  dt in
-  let h2 = h/.2.0 in
-  let h4 = h*.h/.4.0 in
-  let h6 = h/.6.0 in
-  let y' = Array.map (fun x -> x.vit) st.l in
-  let y = Array.map (fun x -> x.pos) st.l in
-  let k1 = f 0.0 y y' st in
-  let k2 = f h2 (y +% mult h2 y' ) (y' +% mult h2 k1) st in
-  let k3 = f h2 (y +% mult h2 y' +% mult h4 k1) (y' +% mult h2 k2) st  in
-  let k4 = f h (y +% mult h y' +% mult (h*.h2) k2) (y' +% mult h k3)  st in
-  let ny = y +% mult h y' +% mult (h*.h6) (k1 +% k2 +% k3)  in
-  let ny' = y' +% mult h6 (k1 +% mult 2.0 k2 +% mult 2.0 k3 +% k4) in
-  to_points ny ny' st
 
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
@@ -56,9 +34,11 @@ let rec loop st =
         else if is_key_down Key.G then  (* l'accélération*)
           let f =  (bilan_des_forces s i st.l dt st.k_ressort) in
           let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange 
+            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange;
+            (Printf.printf "%f %f" (fst st.shift) (snd st.shift); flush_all ())
         (*dessin des ressorts*)  
         else
+          draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
           List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
           draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) (Raylib.color_from_hsv 0.0 (abs_f (d -. d_eq*.fac)/.50.0) 1.0 )) (linked_to i)
     ) st.l;
@@ -86,7 +66,7 @@ Q pour recentrer
   let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
   let ideal = foi (w/2),foi (h/2) in
   let shift' = if is_key_down Key.A then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
-  let l' = rk4 st in
+  let l' = Rk4.runge_kunta {l=st.l;k_ressort = st.k_ressort} in
   loop {
       t =st.t+1;
       l = l';

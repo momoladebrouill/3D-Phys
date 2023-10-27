@@ -8,7 +8,7 @@ type vec = float * float
 type point = {
     pos : vec;
     vit : vec;
-    mass : float;(*couleur du point*)
+    mass : float;
 }
 
 let (+$) (a,b) (c,d) = (a+.c, b+.d)
@@ -17,7 +17,7 @@ let zero = 0.0,0.0
 let ( *$) (a,b) q = (a*.q, b*.q)
 let ps (a,b) (c,d) = a*.c +. b*.d  
 let (+%) = Array.map2 (+$)
-let mult q = Array.map (fun t-> t *$ q)
+let ( *%) q = Array.map (fun t-> t *$ q)
 
 
 let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
