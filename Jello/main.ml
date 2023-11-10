@@ -38,9 +38,9 @@ let rec loop st =
             (Printf.printf "%f %f" (fst st.shift) (snd st.shift); flush_all ())
         (*dessin des ressorts*)  
         else
-          draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
+          begin (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
           List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
-          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) (Raylib.color_from_hsv 0.0 (abs_f (d -. d_eq*.fac)/.50.0) 1.0 )) (linked_to i)
+          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) (Raylib.color_from_hsv 0.0 (abs_f (d -. d_eq*.fac)/.50.0) 1.0 )) (linked_to i) end
     ) st.l;
 
   draw_text (string_of_float st.z ^

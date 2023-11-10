@@ -18,7 +18,7 @@ let amortisseur src dst d =
 (*force pour éviter qu'ils se touchent*)
 
 let repultion s dt acc  =
-  if (snd s.pos) > floor_y then (0.0, -.abs_f (snd s.vit) *. 100.5)
+  if (snd s.pos) > floor_y then (0.0, -.abs_f (snd acc) -. abs_f (snd s.vit) *. dt)
     (*
       0.0,
       () -. abs_f (snd acc)
