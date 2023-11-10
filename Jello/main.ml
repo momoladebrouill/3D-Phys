@@ -34,8 +34,7 @@ let rec loop st =
         else if is_key_down Key.G then  (* l'accélération*)
           let f =  (bilan_des_forces s i st.l dt st.k_ressort) in
           let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange;
-            (Printf.printf "%f %f" (fst st.shift) (snd st.shift); flush_all ())
+            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
         (*dessin des ressorts*)  
         else
           begin (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
