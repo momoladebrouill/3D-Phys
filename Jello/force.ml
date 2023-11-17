@@ -11,11 +11,14 @@ let ressort a b l0 k =
 (*force de repulstion avec les voisins*)
 let repultion a b  = 
     vect_elem b.pos a.pos *$ (k0/.(dist a.pos b.pos)**6.0)
+
 (*force damped avec les autres *)
 let amortisseur src dst d = 
     let er = vect_elem src.pos dst.pos in
     er *$ (d *. ps (src.vit -$ dst.vit) er)
 
+let retour s midpoint k_ressort= 
+  vect_elem midpoint s.pos *$  (dist s.pos midpoint *. (k_ressort/.j0))
 (* TODO : force de repultion entre les particules et avec le sol, en utilisant une force créee sur mesure lors de la collisition https://www.youtube.com/watch?v=9IULfQH7E90*)
 
 (*force pour éviter qu'ils se touchent*)
@@ -26,13 +29,16 @@ let amortisseur src dst d =
   List.fold_left (+$) zero 
     (List.map (fun e -> if dist_square e s.pos > 0.0 then rep e s.pos else zero) l)
 *)
-let bilan_des_forces s i l t k_ressort =
+
+let bilan_des_forces s i l t k_ressort onoff =
+  let midpos = Array.fold_left (+$) zero (Array.map (fun x ->x.pos) l) *$ (1.0/.(foi n)) in  
    [
-    (0.0,9.81) *$ s.mass, green; (*champs de pesanteur*) 
+    (onoff*.5.0,9.81) *$ s.mass, green; (*champs de pesanteur*) 
   ] @ List.concat 
     (List.map (fun (i,d) -> 
          [
             ressort s l.(i) (d_eq*.d) k_ressort, purple;
             amortisseur s l.(i) damping, raywhite;
-            repultion s l.(i), pink
+            repultion s l.(i), pink;
+            retour s midpos k_ressort, yellow;
          ]) (linked_to i)) 

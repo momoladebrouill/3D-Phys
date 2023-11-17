@@ -4,7 +4,7 @@ open Force
 
 exception Superposition of int
 
-type args = {l : point array; k_ressort : float}
+type args = {l : point array; k_ressort : float; onoff : float}
 
 let to_points y y' l =
   Array.init n (fun i-> {pos=y.(i); vit = y'.(i); mass = l.(i).mass}) 
@@ -12,7 +12,7 @@ let to_points y y' l =
 let fix_floor p = 
       {
         pos = fst p.pos,  floor_y -. 0.01;
-        vit = fst p.vit,  0.0;
+        vit = zero;
         mass = p.mass
       }
 
@@ -20,7 +20,7 @@ let fix_floor p =
 let f h y y' args = 
   let points = to_points y y' args.l in
   Array.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points h args.k_ressort) *$ (1.0/.p.mass)) points 
+    somme_forces (bilan_des_forces p i points h args.k_ressort args.onoff) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 
@@ -39,6 +39,6 @@ let rec runge_kunta args =
       let ny = y +% mult h y' +% mult (h*.h6) (k1 +% k2 +% k3)  in
       let ny' = y' +% mult h6 (k1 +% mult 2.0 k2 +% mult 2.0 k3 +% k4) in
       to_points ny ny' args.l
-  with Superposition i->
+  with Superposition i ->
     args.l.(i) <- fix_floor args.l.(i);
     runge_kunta args

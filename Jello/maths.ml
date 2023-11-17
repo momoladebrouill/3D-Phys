@@ -19,7 +19,6 @@ let ps (a,b) (c,d) = a*.c +. b*.d
 let (+%) = Array.map2 (+$)
 let ( *%) q = Array.map (fun t-> t *$ q)
 
-
 let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
 
 let abs_f x = if x < 0.0 then -.x else x
@@ -30,7 +29,6 @@ let dist a b = sqrt (dist_square a b)
 let vect_elem (xa,ya) (xb,yb) =
     let d = dist (xa,ya) (xb,yb) in
     ((xb-.xa)/.d,(yb-.ya)/.d)
-    (*let theta = atan2 (ya -. yb) (xa-.xb) in (cos theta,sin theta*) 
 
 let linked_to i = (*to make a square*)
   let sqrt2 = sqrt 2.0 in 
