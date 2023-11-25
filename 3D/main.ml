@@ -37,14 +37,7 @@ let make_them_fall cubes =
         let open Vector3 in 
         x cube = x' && y cube = y' && z cube = z' 
     in
-    let move t =
-        if (List.exists ((is_at  tx ty (tz -. 1.0)) || ) cubes )|| tz < 1. then  
-            if List.exists (is_at  tx (ty -.1.0) (tz -. 1.0)) cubes then  
-                if List.exists (is_at  (tx -.1.0)  ty (tz -. 1.0)) cubes then Vector3.create tx ty (tz -. 1.0)
-                 else Vector3.create tx ty (tz -. 1.0) 
-            else Vector3.create tx ty (tz -. 1.0) 
-        else t
-
+    let move = Fun.id in
     let rec aux cs acc =
         match cs with
         [] -> acc
@@ -53,12 +46,13 @@ let make_them_fall cubes =
     in aux cubes [] |> List.rev
  
 let rec loop s =
-     if Raylib.window_should_close () then Raylib.close_window () else 
+     if Raylib.window_should_close ()  then Raylib.close_window () else 
          begin_drawing ();
          clear_background Color.black;
          begin_mode_3d s.camera;
          List.iteri (fun i pos -> draw_cube pos 1.0 1.0 1.0 (color_from_hsv (float_of_int (i*360/(List.length s.cubes))) 1. 1.)) s.cubes;
          end_mode_3d ();
+         draw_text "Space S X arrows" 10 10 20 Color.white;
          end_drawing ();
          Camera3D.set_position s.camera (r3_to_vec3 s.pos);
          Camera3D.set_target s.camera (r3_to_vec3 (s.pos $+ (0.0,0.0,-1.0))); 

@@ -15,6 +15,8 @@ type status = {
 
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
+  
+  let integrationDomain = Domain.spawn (fun _ -> Rk4.runge_kunta {l=st.l;k_ressort = st.k_ressort; onoff = if is_key_down Key.R then 1.0 else 0.0} 0) in
   let px (x,_) = iof (x *. st.z +. (fst st.shift)) in 
   let py (_,y) = iof (y *. st.z +. (snd st.shift)) in
   let time_jumping = not (is_key_down Key.Space) in
@@ -67,7 +69,7 @@ R pour la bascule
   let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
   let ideal = foi (w/2),foi (h/2) in
   let shift' = if is_key_down Key.A then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
-  let l' = Rk4.runge_kunta {l=st.l;k_ressort = st.k_ressort; onoff = if is_key_down Key.R then 1.0 else 0.0} in
+  let l' = Domain.join integrationDomain in
   loop {
       t = st.t + 1;
       l = l';
@@ -79,6 +81,7 @@ R pour la bascule
 let setup () =
   Raylib.init_window w h "Blob";
   Raylib.set_target_fps 60;
+  if is_window_ready () then
   let d_init_fac = 0.8 in
   {
       t = 0;
@@ -93,5 +96,6 @@ let setup () =
       z = 1.0;
       k_ressort = k_ressort;
   }
+  else failwith "window not ready"
 
 let () =  setup () |> loop 

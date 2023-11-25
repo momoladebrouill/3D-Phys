@@ -6,12 +6,13 @@ exception Superposition of int
 
 type args = {l : point array; k_ressort : float; onoff : float}
 
+(*creation d'un tableau de points a partir d'un tableau de positions et de vitesses*)
 let to_points y y' l =
   Array.init n (fun i-> {pos=y.(i); vit = y'.(i); mass = l.(i).mass}) 
 
 let fix_floor p = 
       {
-        pos = fst p.pos,  floor_y -. 0.01;
+        pos = fst p.pos,  floor_y -. Random.float 0.1;
         vit = zero;
         mass = p.mass
       }
@@ -24,7 +25,9 @@ let f h y y' args =
 
 let mult = ( *%)
 
-let rec runge_kunta args =
+let rec runge_kunta args iter =
+  if iter > 100 then args.l
+  else
   try 
       let h =  dt in
       let h2 = h/.2.0 in
@@ -41,4 +44,4 @@ let rec runge_kunta args =
       to_points ny ny' args.l
   with Superposition i ->
     args.l.(i) <- fix_floor args.l.(i);
-    runge_kunta args
+    runge_kunta args (iter+1)
