@@ -4,7 +4,12 @@ open Force
 
 exception Superposition of int
 
-type args = {l : point array; k_ressort : float; onoff : float}
+(*arguments de la fonction f*)
+type args = {
+  l : point array;
+  k_ressort : float;
+  penche : float
+}
 
 (*creation d'un tableau de points a partir d'un tableau de positions et de vitesses*)
 let to_points y y' l =
@@ -21,11 +26,11 @@ let fix_floor p =
 let f h y y' args = 
   let points = to_points y y' args.l in
   Array.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points h args.k_ressort args.onoff) *$ (1.0/.p.mass)) points 
+    somme_forces (bilan_des_forces p i points h args.k_ressort args.penche) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 
-let rec runge_kunta args iter =
+let rec runge_kunta args iter = if false then args.l else  
   if iter > 100 then args.l
   else
   try 
