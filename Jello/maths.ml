@@ -16,7 +16,9 @@ let (-$) (a,b) (c,d) = (a-.c, b-.d)
 let zero = 0.0,0.0
 let ( *$) (a,b) q = (a*.q, b*.q)
 let ps (a,b) (c,d) = a*.c +. b*.d  
-let (+%) = Array.map2 (+$)
+let (+%) a b = try
+  Array.map2 (+$) a b
+  with _ -> Printf.printf "%d %d\n" (Array.length a) (Array.length b); failwith "fdivso"
 let ( *%) q = Array.map (fun t-> t *$ q)
 
 let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
@@ -31,8 +33,4 @@ let vect_elem (xa,ya) (xb,yb) =
     ((xb-.xa)/.d,(yb-.ya)/.d)
 
 let linked_to i = (*to make a square*)
-  let sqrt2 = sqrt 2.0 in 
-  let east = [i+1,1.0; i+w_blob+1,sqrt2; i-w_blob+1,sqrt2] in
-  let west = [i-1,1.0; i+w_blob-1,sqrt2; i-w_blob-1,sqrt2] in
-  let l = (i - w_blob, 1.0)::(i + w_blob, 1.0)::(if i mod w_blob =  0 then east else if i mod w_blob = w_blob-1 then west else east @ west)
-  in List.filter (fun (j,_) -> j >= 0 && j < n) l
+  if true  then [((i+1) mod n,1.0)] else []

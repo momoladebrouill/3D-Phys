@@ -23,15 +23,15 @@ let fix_floor p =
       }
 
 (*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
-let f h y y' args = 
+let f _ y y' args = 
   let points = to_points y y' args.l in
   Array.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points h args.k_ressort args.penche) *$ (1.0/.p.mass)) points 
+    somme_forces (bilan_des_forces p i points  args.k_ressort args.penche) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 
 let rec runge_kunta args iter = if false then args.l else  
-  if iter > 100 then args.l
+  if iter > 10 then args.l
   else
   try 
       let h =  dt in

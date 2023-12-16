@@ -28,7 +28,7 @@ let rec loop st =
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Array.iteri (fun i s ->
         let fac_newt = 0.1 in
-        let f =  (bilan_des_forces s i st.l dt st.k_ressort st.penche) in
+        let f =  (bilan_des_forces s i st.l st.k_ressort st.penche) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> 
             let end_force = s.pos +$ (f *$ (fac_newt*.st.z)) in 
@@ -38,9 +38,8 @@ let rec loop st =
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
         else
           begin 
-         (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite
-          *)
-          List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
+         draw_rectangle  (px s.pos) (py s.pos) 2 2 (if List.exists (fun (j,_)->snd st.l.(j).pos < snd s.pos) (linked_to i) then Color.raywhite else Color.red);
+          List.iter (fun (posb,_) -> 
           draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) end)  
       st.l;
   draw_line 10 10 (10 + iof (100.0*.st.z)) 10 Color.white;
@@ -82,17 +81,20 @@ let setup () =
   Raylib.init_window w h "Blob";
   Raylib.set_target_fps 60;
   if is_window_ready () then
-  let d_init_fac = 0.8 in
-  let d = d_eq*.d_init_fac in
+  let d_init = d_eq in
   {
       t = 0;
-      l = Array.init n (fun i -> 
+      l = Array.of_list (List.map (fun (x,y) ->  
           {
-              pos = foi (w/2) +. d *. (foi (i mod w_blob) -. 1.0),
-                    foi (h/2) +. d *. (foi (i/w_blob));
+              pos = (foi (w/2) +. foi x *.d_init, foi (h/2) +. foi y*.d_init);
               vit = (0.0,0.0);
               mass = mass; (*.(foi i)/.(foi n) *)
-          });
+          }) (
+            (List.init (t_blob) (fun i-> i,0)) @ 
+            (List.init (t_blob-1) (fun i-> t_blob-1,i+1)) @ 
+            (List.init (t_blob) (fun i-> t_blob-i- 1,t_blob)) @ 
+            (List.init (t_blob-1) (fun i-> 0,t_blob-i- 1))  
+            ));
       shift = zero;
       z = 1.0;
       penche = 0.0;
