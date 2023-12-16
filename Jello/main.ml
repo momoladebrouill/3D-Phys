@@ -39,6 +39,7 @@ let rec loop st =
         else
           begin 
          draw_rectangle  (px s.pos) (py s.pos) 2 2 (if List.exists (fun (j,_)->snd st.l.(j).pos < snd s.pos) (linked_to i) then Color.raywhite else Color.red);
+         draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
           List.iter (fun (posb,_) -> 
           draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) end)  
       st.l;
@@ -88,12 +89,12 @@ let setup () =
           {
               pos = (foi (w/2) +. foi x *.d_init, foi (h/2) +. foi y*.d_init);
               vit = (0.0,0.0);
-              mass = mass; (*.(foi i)/.(foi n) *)
+              mass = mass; 
           }) (
             (List.init (t_blob) (fun i-> i,0)) @ 
-            (List.init (t_blob-1) (fun i-> t_blob-1,i+1)) @ 
-            (List.init (t_blob) (fun i-> t_blob-i- 1,t_blob)) @ 
-            (List.init (t_blob-1) (fun i-> 0,t_blob-i- 1))  
+            (List.init (t_blob-2) (fun i-> t_blob-1,i+1)) @ 
+            (List.init (t_blob) (fun i-> t_blob-i-1,t_blob-1)) @ 
+            (List.init (t_blob-2) (fun i-> 0,t_blob-i-2))  
             ));
       shift = zero;
       z = 1.0;

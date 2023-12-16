@@ -32,5 +32,5 @@ let vect_elem (xa,ya) (xb,yb) =
     let d = dist (xa,ya) (xb,yb) in
     ((xb-.xa)/.d,(yb-.ya)/.d)
 
-let linked_to i = (*to make a square*)
-  if true  then [((i+1) mod n,1.0)] else []
+let linked_to i = (*relié au suivant et au précédent*)
+  [((i+1) mod n,1.0);((n+i-1) mod n,1.0)]
