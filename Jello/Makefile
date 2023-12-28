@@ -1,5 +1,5 @@
 
 all:
-	dune build
+	dune build --profile release
 	# dune build --profile release
 	./_build/default/main.exe
