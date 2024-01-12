@@ -100,4 +100,6 @@ let setup () =
   }
   else failwith "window not ready"
 
-let () =  setup () |> loop 
+let () =
+  Printf.printf "AAAAAh %d" (Domain.recommended_domain_count (()));
+  setup () |> loop 
