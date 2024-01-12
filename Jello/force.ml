@@ -21,8 +21,8 @@ let gaz src dst vol =
   (*thanks Maciej Matyka*)
   let n = normal src.pos dst.pos in
   n*$ 
-  
     ((-1.0/.vol) *. (dist src.pos dst.pos) *. nrT)
+
 let bilan_des_forces s i l k_ressort penche =
   let volume = 
     let maxx, maxy, minx, miny = Array.fold_left 
@@ -43,6 +43,7 @@ let bilan_des_forces s i l k_ressort penche =
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), green; (*champs de pesanteur*) 
        gaz s l.((i+1) mod n) volume, pink;
+       gaz l.((i+n-1) mod n) s volume, pink;
   ] @ List.concat 
     (List.map (fun (i,d) -> 
          [

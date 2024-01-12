@@ -31,7 +31,7 @@ let f _ y y' args =
 let mult = ( *%)
 
 let rec runge_kunta args iter = if 1=0 then args.l else  
-  if iter > 10 then args.l
+  if iter > rk_tries then args.l
   else
   try 
       let h =  dt in
