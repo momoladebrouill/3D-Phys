@@ -3,6 +3,7 @@ open Force
 open Maths  
 open Constantes
 open Rk4
+open Graph
 
 type status = {
     t : int; (*temps*)
@@ -26,7 +27,7 @@ let rec loop st =
   clear_background Color.darkblue;
     let posa = (0, foi h)  in
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
-    Array.iteri (fun i s ->
+    Graph.iteri (fun i s ->
         let fac_newt = 0.1 in
         let f =  (bilan_des_forces s i st.l st.k_ressort st.penche) in
         if is_key_down Key.F then (*juste les forces*)
@@ -85,17 +86,7 @@ let setup () =
   let d_init = d_eq in
   {
       t = 0;
-      l = Array.of_list (List.map (fun (x,y) ->  
-          {
-              pos = (foi (w/2) +. foi x *.d_init, foi (h/2) +. foi y*.d_init);
-              vit = (0.0,0.0);
-              mass = mass; 
-          }) (
-            (List.init (t_blob) (fun i-> i,0)) @ 
-            (List.init (t_blob-2) (fun i-> t_blob-1,i+1)) @ 
-            (List.init (t_blob) (fun i-> t_blob-i-1,t_blob-1)) @ 
-            (List.init (t_blob-2) (fun i-> 0,t_blob-i-2))  
-            ));
+      l = Graph.initial ();
       shift = zero;
       z = 1.0;
       penche = 0.0;

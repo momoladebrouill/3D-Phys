@@ -25,10 +25,10 @@ let gaz src dst vol =
 
 let bilan_des_forces s i l k_ressort penche =
   let volume = 
-    let maxx, maxy, minx, miny = Array.fold_left 
+    let maxx, maxy, minx, miny = Graph.fold_left 
       (fun (maxx,maxy,minx,miny) (x,y) -> max maxx x, max maxy y,min minx x, min miny y) 
         (fst l.(0).pos, snd l.(0).pos,fst l.(0).pos, snd l.(0).pos) 
-        (Array.map (fun x ->x.pos) l) in  ((maxy-.miny)*.(maxx-.minx))/.1000.0 (* on suppose que c'est un carré*)
+        (Graph.map (fun x ->x.pos) l) in  ((maxy-.miny)*.(maxx-.minx))/.1000.0 (* on suppose que c'est un carré*)
   in
   let gaussian_volume =
     let v i src =  
@@ -38,7 +38,7 @@ let bilan_des_forces s i l k_ressort penche =
           *. abs_f (fst (normal src.pos dst.pos))
           *. dist src.pos dst.pos
   in
-    Array.fold_left (+.) 0.0 (Array.mapi v l)
+    Graph.fold_left (+.) 0.0 (Graph.mapi v l)
    in
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), green; (*champs de pesanteur*) 
@@ -50,4 +50,4 @@ let bilan_des_forces s i l k_ressort penche =
             ressort s l.(i) (d_eq*.d) k_ressort, purple;
             amortisseur s l.(i) damping, raywhite;
             repultion s l.(i), yellow;
-         ]) (linked_to i)) 
+         ]) (Graph.linked_to i)) 

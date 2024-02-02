@@ -2,24 +2,22 @@ open Constantes
 
 let foi = float_of_int
 let iof = int_of_float
-
 type vec = float * float
-
 type point = {
     pos : vec;
     vit : vec;
     mass : float;
 }
+let foi = float_of_int
+let iof = int_of_float
+
+
 
 let (+$) (a,b) (c,d) = (a+.c, b+.d)
 let (-$) (a,b) (c,d) = (a-.c, b-.d)
 let zero = 0.0,0.0
 let ( *$) (a,b) q = (a*.q, b*.q)
 let ps (a,b) (c,d) = a*.c +. b*.d  
-let (+%) a b = try
-  Array.map2 (+$) a b
-  with _ -> Printf.printf "%d %d\n" (Array.length a) (Array.length b); failwith "fdivso"
-let ( *%) q = Array.map (fun t-> t *$ q)
 
 let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
 
@@ -51,5 +49,3 @@ let normal (xa,ya) (xb,yb) = (*calcul du vecteur unitaire normal à la droite re
   else 
   let c = (xb-.xa) /. (yb -. ya)
   in vect_elem zero (sign_f (ya-.yb),c)*)
-let linked_to i = (*relié au suivant et au précédent*)
-  [((i+1) mod n,1.0);((n+i-1) mod n,1.0)]

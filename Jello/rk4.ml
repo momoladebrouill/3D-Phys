@@ -1,6 +1,7 @@
 open Maths
 open Constantes
 open Force
+open Graph
 
 exception Superposition of int
 
@@ -13,7 +14,7 @@ type args = {
 
 (*creation d'un tableau de points a partir d'un tableau de positions et de vitesses*)
 let to_points y y' l =
-  Array.init n (fun i-> {pos=y.(i); vit = y'.(i); mass = l.(i).mass}) 
+  Graph.init n (fun i-> {pos=y.(i); vit = y'.(i); mass = l.(i).mass}) 
 
 let fix_floor p = 
       {
@@ -25,7 +26,7 @@ let fix_floor p =
 (*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
 let f _ y y' args = 
   let points = to_points y y' args.l in
-  Array.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
+  Graph.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
     somme_forces (bilan_des_forces p i points  args.k_ressort args.penche) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
@@ -38,8 +39,8 @@ let rec runge_kunta args iter = if 1=0 then args.l else
       let h2 = h/.2.0 in
       let h4 = h*.h/.4.0 in
       let h6 = h/.6.0 in
-      let y' = Array.map (fun x -> x.vit) args.l in
-      let y = Array.map (fun x -> x.pos) args.l in
+      let y' = Graph.map (fun x -> x.vit) args.l in
+      let y = Graph.map (fun x -> x.pos) args.l in
       let k1 = f 0.0 y y' args in
       let k2 = f h2 (y +% mult h2 y' ) (y' +% mult h2 k1) args in
       let k3 = f h2 (y +% mult h2 y' +% mult h4 k1) (y' +% mult h2 k2) args  in
