@@ -1,7 +1,7 @@
 open Raylib.Color
 open Maths
 open Constantes
-
+open Graph
 type force = point * Raylib.Color.t
 
 (*force elastique avec les autres *)

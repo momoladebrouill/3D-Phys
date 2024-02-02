@@ -16,6 +16,6 @@ let k0 = 5e6 (*N.m6*)
 let j0 = 200.0 (*N.m-1*)
 let gravity = (0.0,9.81) (*m.s-2*)
 (*Taille du blob *)
-let nrT = 9e2
-let t_blob = 5
+let nrT = 9e3
+let t_blob = 20
 let n = 4*t_blob- 4  
