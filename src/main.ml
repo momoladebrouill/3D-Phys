@@ -15,6 +15,7 @@ type status = {
 }
 
 
+let couleur_fond = Color.create 0 0 100 1
 
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
@@ -26,7 +27,7 @@ let rec loop st =
   if time_jumping || st.t mod 30 = 0 then begin 
         (*affichage*)
   begin_drawing ();
-  clear_background Color.darkblue;
+  clear_background couleur_fond;
     let posa = (0, foi h)  in
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->

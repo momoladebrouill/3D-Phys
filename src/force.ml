@@ -9,7 +9,7 @@ let ressort a b l0 k =
 
 (*force de repulstion avec les voisins*)
 let repultion a b  = 
-    vect_elem b.pos a.pos *$ (k0/.(dist a.pos b.pos)**12.0)
+    vect_elem b.pos a.pos *$ (k_rep/.(dist a.pos b.pos)**4.0)
 
 (*force damped avec les autres *)
 let amortisseur src dst d = 
@@ -39,13 +39,13 @@ let bilan_des_forces s i l k_ressort penche =
     in Graph.fold_left (+.) 0.0 (Graph.mapi v l)
   in*)
    [
-    (penche*.5.0,9.81) *$ (1.0*.s.mass), green; (*champs de pesanteur*) 
-       gaz s l.((i+1) mod n) volume, pink;
-       gaz l.((i+n-1) mod n) s volume, pink;
+    (penche*.5.0,9.81) *$ (1.0*.s.mass), yellow; (*champs de pesanteur*) 
+       gaz s l.((i+1) mod n) volume, green;
+       gaz l.((i+n-1) mod n) s volume, green;
   ] @ List.concat 
     (List.map (fun (i,d) -> 
          [
-            ressort s l.(i) (d_eq*.d) k_ressort, purple;
+            ressort s l.(i) d k_ressort, blue;
             amortisseur s l.(i) damping, raywhite;
-            repultion s l.(i), yellow;
+            repultion s l.(i), red;
          ]) (Graph.linked_to i)) 

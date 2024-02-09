@@ -11,10 +11,13 @@ let floor_y = float_of_int h (*sol, c'est un hasard que ça corresponde à la ta
 let mass = 50.0 (*masses des particules de referencei (kg)*)
 let k_ressort = 1e3 (*constante de raideur (N/m)*)
 let damping = -150.0 (*damping du ressort*)
-let k0 = 5e6 (*N.m6*)
+let k_rep = 10.0 
 let gravity = (0.0,9.81) (*m.s-2*)
 (*Taille du blob *)
 let nrT = 9e3
 let rayon = 50.0
-let n = 4 * 10 
-let d_eq = rayon *. 3.14/. (float_of_int n)(*distance d'equilibre des ressorts (m)*)
+let rings = 3
+let ring = 9
+let n = rings * ring
+let d_eq = rayon *. 3.14/. (float_of_int ring)(*distance d'equilibre des ressorts (m)*)
+let d_eq_rayon = d_eq/.2.0
