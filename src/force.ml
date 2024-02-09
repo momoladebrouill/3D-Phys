@@ -20,7 +20,7 @@ let amortisseur src dst d =
 let retour s midpoint k_ressort= 
   vect_elem midpoint s.pos *$  (dist s.pos midpoint *. (k_ressort/.j0))
 
-let bilan_des_forces s i l t k_ressort penche =
+let bilan_des_forces s i l t  k_ressort penche =
   let midpos = Array.fold_left (+$) zero (Array.map (fun x ->x.pos) l) *$ (1.0/.(foi n)) in  
    [
     (penche*.5.0,9.81) *$ s.mass, green; (*champs de pesanteur*) 
