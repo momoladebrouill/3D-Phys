@@ -1,105 +1,104 @@
 open Raylib
-open Force
-open Maths  
-open Constantes
-open Rk4
+open Maths
 
-type status = {
-    t : int; (*temps*)
-    l : point array; (*le tableau des points*)
-    z : float; (*zoom*) 
-    shift : vec; (*shift de la cam*)
-    k_ressort : float; (*la constante de ressort*)
-    penche : float; (*1.0 ou 0.0 selon si la gravité est inclinée*)
+let w = 1000
+let h = 1000
+let zero = Vector3.create 0. 0. 0. 
+
+type direction = {
+  vertical : float;
+  horizontal : float;
 }
 
-
-let rec loop st =
-  if Raylib.window_should_close () then Raylib.close_window () else 
-  
-  let integrationDomain = Domain.spawn (fun _ -> Rk4.runge_kunta {l=st.l;k_ressort = st.k_ressort;penche = st.penche} 0) in
-  let px (x,_) = iof (x *. st.z +. (fst st.shift)) in 
-  let py (_,y) = iof (y *. st.z +. (snd st.shift)) in
-  let time_jumping = not (is_key_down Key.Space) in
-  if time_jumping || st.t mod 30 = 0 then begin 
-        (*affichage*)
-  clear_background Color.darkblue;
-    let posa = (0, foi h)  in
-    draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
-    Array.iteri (fun i s ->
-        let fac_newt = 0.1 in
-        let f =  (bilan_des_forces s i st.l dt st.k_ressort st.penche) in
-        if is_key_down Key.F then (*juste les forces*)
-          List.iter (fun (f,col) -> 
-            let end_force = s.pos +$ (f *$ (fac_newt*.st.z)) in 
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) col) f
-        else if is_key_down Key.G then  (* l'accélération*)
-          let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
-        else
-          begin 
-         (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite
-          *)
-          List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
-          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) end)  
-      st.l;
-  draw_line 10 10 (10 + iof (100.0*.st.z)) 10 Color.white;
-  draw_text (string_of_float st.z ^
-"+/- pour le zoom
-F pour le mode forces
-Arrows pour le deplacement
-Space pour le saut temporel
-Q pour recentrer
-R pour la bascule
-" ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
-    ) 10 20 20 Color.raywhite;
-  begin_drawing ();
-  end_drawing ();
-  end;
-  let vitesse = -100.0 in
-  let shift' = List.fold_left (+$) st.shift
-      [
-          if is_key_down Key.Up then 0.0,-.vitesse else zero; 
-          if is_key_down Key.Down then 0.0,vitesse else zero; 
-          if is_key_down Key.Left then -.vitesse,0.0 else zero; 
-          if is_key_down Key.Right then vitesse,0.0 else zero; 
-     ] 
-  in
-  let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
-  let ideal = foi (w/2), foi (h/2) in
-  let shift' = if is_key_down Key.A then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
-  let l' = Domain.join integrationDomain in
-  loop {
-      t = st.t + 1;
-      l = l';
-      shift = shift';
-      z = max 0.0 (st.z +. let vitesse = 0.01 in if is_key_down Key.Kp_add then vitesse else if is_key_down Key.Kp_subtract then -.vitesse else 0.0) ;
-      k_ressort = max 0.0 (st.k_ressort +. let vitesse = 1.0 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
-      penche = if is_key_down Key.R then 1.0 else 0.0
-  }
+type status = {
+    camera : Camera3D.t;
+    pos : r3;
+    target : direction;
+    cubes : r3 list;
+    t : float;
+}
 
 let setup () =
-  Raylib.init_window w h "Blob";
+  Raylib.init_window w h "vichy";
   Raylib.set_target_fps 60;
   if is_window_ready () then
-  let d_init_fac = 0.8 in
-  let d = d_eq*.d_init_fac in
   {
-      t = 0;
-      l = Array.init n (fun i -> 
-          {
-              pos = foi (w/2) +. d *. (foi (i mod w_blob) -. 1.0),
-                    foi (h/2) +. d *. (foi (i/w_blob));
-              vit = (0.0,0.0);
-              mass = mass; (*.(foi i)/.(foi n) *)
-          });
-      shift = zero;
-      z = 1.0;
-      penche = 0.0;
-      k_ressort = k_ressort;
-  }
-  else failwith "window not ready"
+      camera = Camera3D.create zero zero (Vector3.create 0. 1. 0.) 45. CameraProjection.Perspective;
+      pos = (0.0,0.0,10.0);
+      target = {
+        vertical = 0.0;
+        horizontal = 0.0;
+      };
+      t = 0.0;
+      cubes = List.init 100 (fun i -> (float_of_int (i mod 10), float_of_int (i/10), 0.0); )
+   }
+   else raise (Invalid_argument "window not ready")
 
-let () =
-  Printf.printf "AAAAAh %d" (Domain.recommended_domain_count (()));
-  setup () |> loop 
+let r3_to_vec3 pos =
+    let x,y,z = pos in
+    Vector3.create x z y
+
+let fst (a, b, c) = a
+let snd (a, b, c) = b
+let trd (a, b, c) = c
+let round_r3 (a, b, c) = (float_of_int (int_of_float a), float_of_int (int_of_float b), float_of_int (int_of_float c))
+let make_them_fall cubes = 
+    let move pos = 
+      let next_pos = (fst pos, snd pos,(trd pos) -. 1.0) in
+      if (trd pos) < 0.0 || List.exists ((=) next_pos) cubes then pos else next_pos
+
+    in
+    List.map move cubes
+
+let sinus t cubes =
+  let sinus cube =
+    let x,y,_ = cube in
+    (x, y,  1. +. (sin (t +. x +. y)))
+  in
+  List.map sinus cubes
+let rec loop s =
+     if Raylib.window_should_close () then Raylib.close_window () else 
+         let dir =
+          let open Maths in
+          (
+          cos s.target.horizontal *. cos s.target.vertical,
+          cos s.target.horizontal *. sin s.target.vertical,
+          sin s.target.horizontal
+          ) in
+         clear_background Color.black;
+         begin_mode_3d s.camera;
+         draw_cube zero 1.0 1.0 1.0 Color.raywhite; 
+         draw_cube zero 10.0 1.0 10.0 Color.raywhite; 
+         draw_grid 100 10.0;
+         let l = List.length s.cubes in
+         List.iteri (fun i pos -> 
+          draw_cube (r3_to_vec3 pos) 1.0 1.0 1.0 (color_from_hsv (foi (i*360/l)) 1. 1.);
+          ()
+          ) s.cubes;
+
+         Camera3D.set_position s.camera (r3_to_vec3 s.pos);
+         Camera3D.set_target s.camera (r3_to_vec3 (s.pos +$ (dir *$ 5.))); 
+         end_mode_3d ();
+         draw_text ("Space S X arrows"^(string_of_float s.target.horizontal)) 10 10 20 Color.white;
+         begin_drawing ();
+         end_drawing ();
+         let pos' = s.pos 
+          +$ ((if is_key_down Key.W then (1.0,0.,0.) else (0.,0.,0.) +$ if is_key_down Key.S then (-1.0,0.,0.) else (0.,0.,0.)) *$ sin s.target.horizontal)
+          +$ ((if is_key_down Key.A then (0.,1.0,0.) else (0.,0.,0.) +$ if is_key_down Key.D then (0.,-1.0,0.) else (0.,0.,0.)) *$ cos s.target.horizontal)
+          +$ if is_key_down Key.Space then (0.,0.,1.0) else (0.,0.,0.) +$ if is_key_down Key.Left_shift then (0.,0.,-1.0) else (0.,0.,0.) 
+          in
+         let target' = {
+          horizontal = s.target.horizontal +. 0.02*.(if is_key_down Key.Up then 1.0 else 0.0 -. if is_key_down Key.Down then 1.0 else 0.0);
+          vertical = s.target.vertical +. 0.02*.(if is_key_down Key.Right then 1.0 else 0.0 -. if is_key_down Key.Left then 1.0 else 0.0);
+         } in
+
+         loop {
+             camera = s.camera;
+             cubes = if is_key_pressed Key.U then (round_r3 s.pos)::s.cubes 
+              else sinus s.t s.cubes;
+             pos = pos';
+             t = s.t +. 0.1;
+             target = target';
+          }
+
+let () = () |> setup |> loop; 

@@ -1,5 +1,2 @@
-(executable 
- (name main)
- (libraries raylib)
- (modules main Maths Force Constantes Rk4)
-)
+(executable (name main)
+            (libraries raylib))
