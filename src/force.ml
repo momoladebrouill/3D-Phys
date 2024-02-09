@@ -1,7 +1,6 @@
 open Raylib.Color
 open Maths
 open Constantes
-open Graph
 type force = point * Raylib.Color.t
 
 (*force elastique avec les autres *)
@@ -30,16 +29,15 @@ let bilan_des_forces s i l k_ressort penche =
         (fst l.(0).pos, snd l.(0).pos,fst l.(0).pos, snd l.(0).pos) 
         (Graph.map (fun x ->x.pos) l) in  ((maxy-.miny)*.(maxx-.minx))/.1000.0 (* on suppose que c'est un carré*)
   in
-  let gaussian_volume =
+  (*let gaussian_volume =
     let v i src =  
         let dst = l.((i+1) mod n ) in
           0.5 
           *. abs_f (fst src.pos -. fst dst.pos) 
           *. abs_f (fst (normal src.pos dst.pos))
           *. dist src.pos dst.pos
-  in
-    Graph.fold_left (+.) 0.0 (Graph.mapi v l)
-   in
+    in Graph.fold_left (+.) 0.0 (Graph.mapi v l)
+  in*)
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), green; (*champs de pesanteur*) 
        gaz s l.((i+1) mod n) volume, pink;

@@ -1,5 +1,3 @@
-open Constantes
-
 let foi = float_of_int
 let iof = int_of_float
 type vec = float * float
@@ -8,9 +6,6 @@ type point = {
     vit : vec;
     mass : float;
 }
-let foi = float_of_int
-let iof = int_of_float
-
 
 
 let (+$) (a,b) (c,d) = (a+.c, b+.d)

@@ -15,6 +15,7 @@ type status = {
 }
 
 
+
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
   
@@ -24,6 +25,7 @@ let rec loop st =
   let time_jumping = not (is_key_down Key.Space) in
   if time_jumping || st.t mod 30 = 0 then begin 
         (*affichage*)
+  begin_drawing ();
   clear_background Color.darkblue;
     let posa = (0, foi h)  in
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
@@ -54,7 +56,6 @@ Q pour recentrer
 R pour la bascule
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
     ) 10 20 20 Color.raywhite;
-  begin_drawing ();
   end_drawing ();
   end;
   let vitesse = -100.0 in
@@ -83,7 +84,6 @@ let setup () =
   Raylib.init_window w h "Blob";
   Raylib.set_target_fps 60;
   if is_window_ready () then
-  let d_init = d_eq in
   {
       t = 0;
       l = Graph.initial ();
@@ -94,4 +94,7 @@ let setup () =
   }
   else failwith "window not ready"
 
-let () =  setup () |> loop 
+let () =  
+  setup () |> loop;
+
+  
