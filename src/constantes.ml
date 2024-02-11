@@ -16,8 +16,9 @@ let gravity = (0.0,9.81) (*m.s-2*)
 (*Taille du blob *)
 let nrT = 9e3
 let rayon = 50.0
-let rings = 2
-let ring = 9
+let rings = 3
+let ring = 20
 let n = rings * ring
-let d_eq = rayon *. 3.14/. (float_of_int ring)(*distance d'equilibre des ressorts (m)*)
-let d_eq_rayon = d_eq/.2.0
+let d_eq = 2.0 *. 3.14/. (float_of_int ring)(*distance d'equilibre des ressorts (m)*)
+let d_eq_rayon = rayon/.8.0
+let animate = true

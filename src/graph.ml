@@ -19,15 +19,16 @@ let initial () =
     (List.map (fun (x,y,mult) ->  
           let r = rayon +. foi mult *. d_eq_rayon in
           {
-              pos = foi (w/2) +. x *. r, foi (h/2) +. y*.r;
+              pos = foi (w/2) +. x *. r,  y*.r;
               vit = 0.0,0.0;
               mass = mass; 
           })
        (
        List.concat (List.init rings 
        (fun ring_no -> 
-        List.init ring (fun i-> 
-          let theta = 2.0*.3.14*.(foi i)/.(foi ring) in cos theta, sin theta, ring_no)
+        List.init ring (fun i-> let theta = 2.0*.3.14*.(foi i)/.(foi ring) in 
+          cos theta, sin theta, ring_no
+          )
         ))
        )
     )
@@ -36,11 +37,13 @@ let gauche i = i/ring * ring + (i+1) mod ring
 (*dans mon anneau, celui à ma droite*)
 let droite i = i/ring * ring + (i+ring-1) mod ring
 
-let linked_to i = (*relié au suivant et au précédent*)
+(*relié au suivant et au précédent*)
+let linked_to i = 
+   let d = d_eq *.(rayon +. d_eq_rayon *. foi (i/ring) ) in 
   [
     (*sur mon anneau*)
-    (i/ring) * ring + ((i+1) mod ring),d_eq;
-    (i/ring) * ring + ((ring+i-1) mod ring),d_eq;
+    (i/ring) * ring + ((i+1) mod ring), d;
+    (i/ring) * ring + ((ring+i-1) mod ring),d  ;
   ]
  (*connecter les anneaux*)
   @ if i/ring+1 = rings then [] else  

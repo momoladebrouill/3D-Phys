@@ -31,7 +31,7 @@ let f _ y y' args =
 
 let mult = ( *%)
 
-let rec runge_kunta args iter = if 1=0 then args.l else  
+let rec runge_kunta args iter = if not animate then args.l else  
   if iter > rk_tries then args.l
   else
   try 

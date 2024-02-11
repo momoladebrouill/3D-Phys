@@ -12,6 +12,7 @@ let (+$) (a,b) (c,d) = (a+.c, b+.d)
 let (-$) (a,b) (c,d) = (a-.c, b-.d)
 let zero = 0.0,0.0
 let ( *$) (a,b) q = (a*.q, b*.q)
+let ( /$) (a,b) q = (a/.q, b/.q) 
 let ps (a,b) (c,d) = a*.c +. b*.d  
 
 let somme_forces l = List.fold_left (fun x (f,_) -> x +$ f ) zero l  
@@ -21,6 +22,8 @@ let sign_f x = if x <0.0 then -1. else 1.
 
 let dist_square (xa,ya) (xb,yb) = (xa-.xb)**2.0 +. (ya-.yb)**2.0
 let dist a b = sqrt (dist_square a b)
+let norme = dist zero
+let rotate (x,y) a = (x*.cos a -. y*.sin a, x*.sin a +. y*.cos a)
 
 let vect_elem (xa,ya) (xb,yb) =
     let d = dist (xa,ya) (xb,yb) in
