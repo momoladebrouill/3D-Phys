@@ -38,10 +38,10 @@ let rec loop st =
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
         else
           begin 
-         (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite
-          *)
-          List.iter (fun (posb,fac) -> let d = dist s.pos st.l.(posb).pos  in
-          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) end)  
+          List.iter (fun (posb,fac) -> draw_line 
+          (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) 
+          Color.raywhite) (linked_to i) 
+          end)  
       st.l;
   draw_line 10 10 (10 + iof (100.0*.st.z)) 10 Color.white;
   draw_text (string_of_float st.z ^

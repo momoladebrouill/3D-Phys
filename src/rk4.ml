@@ -17,7 +17,7 @@ let to_points y y' l =
 
 let fix_floor p = 
       {
-        pos = fst p.pos,  floor_y -. Random.float 0.1;
+        pos = fst p.pos,  floor_y -. Random.float 1.0;
         vit = zero;
         mass = p.mass
       }
@@ -31,7 +31,7 @@ let f h y y' args =
 let mult = ( *%)
 
 let rec runge_kunta args iter = if false then args.l else  
-  if iter > 100 then args.l
+  if iter > 10 then args.l
   else
   try 
       let h =  dt in
