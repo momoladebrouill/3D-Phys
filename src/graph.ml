@@ -31,6 +31,10 @@ let initial () =
         ))
        )
     )
+(*dans mon anneau, celui à ma gauche*)
+let gauche i = i/ring * ring + (i+1) mod ring
+(*dans mon anneau, celui à ma droite*)
+let droite i = i/ring * ring + (i+ring-1) mod ring
 
 let linked_to i = (*relié au suivant et au précédent*)
   [

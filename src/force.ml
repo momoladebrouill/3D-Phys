@@ -40,8 +40,8 @@ let bilan_des_forces s i l k_ressort penche =
   in*)
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), yellow; (*champs de pesanteur*) 
-       gaz s l.((i+1) mod n) volume, green;
-       gaz l.((i+n-1) mod n) s volume, green;
+       gaz s l.(Graph.gauche i) volume, green;
+       gaz l.(Graph.droite i) s volume, green;
   ] @ List.concat 
     (List.map (fun (i,d) -> 
          [
