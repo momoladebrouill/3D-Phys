@@ -20,5 +20,5 @@ let rings = 3
 let ring = 20
 let n = rings * ring
 let d_eq = 2.0 *. 3.14/. (float_of_int ring)(*distance d'equilibre des ressorts (m)*)
-let d_eq_rayon = rayon/.8.0
+let d_eq_rayon = rayon/.(float_of_int rings)
 let animate = true

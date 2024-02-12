@@ -34,7 +34,7 @@ let rec loop st =
     let midpos = Vector2.create (pxf st.l.(0).pos) (pyf st.l.(0).pos) in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->
-        let fac_newt = 0.001 in
+        let fac_newt = 0.1 in
         let f =  (bilan_des_forces s i st.l st.k_ressort st.penche) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> 
@@ -55,12 +55,14 @@ let rec loop st =
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
         else if is_key_down Key.S  && i < ring (* ring * (rings-1)*) then (*la surface*)
             draw_triangle (Vector2.create (pxf s.pos) (pyf s.pos)) (Vector2.create (pxf st.l.(droite i).pos) (pyf st.l.(droite i).pos)) midpos Color.red
-         else
+         else if not (is_key_down Key.S) then
           begin 
          draw_rectangle  (px s.pos) (py s.pos) 2 2 (if List.exists (fun (j,_)->snd st.l.(j).pos < snd s.pos) (linked_to i) then Color.raywhite else Color.red);
          draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
           List.iter (fun (posb,_) -> 
-          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) end)  
+          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) 
+          end else ()
+          ) 
       st.l;
   draw_line 10 10 (10 + iof (100.0*.st.z)) 10 Color.white;
   draw_text (string_of_float st.z ^
