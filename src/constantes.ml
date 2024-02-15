@@ -14,11 +14,14 @@ let damping = -150.0 (*damping du ressort*)
 let k_rep = 10.0 
 let gravity = (0.0,9.81) (*m.s-2*)
 (*Taille du blob *)
-let nrT = 9e3
-let rayon = 50.0
+let nRT = 9e3
+let rayon = 100.0
 let rings = 3
-let ring = 20
+let ring = 10
 let n = rings * ring
 let d_eq = 2.0 *. 3.14/. (float_of_int ring)(*distance d'equilibre des ressorts (m)*)
-let d_eq_rayon = rayon/.(float_of_int rings)
+let interstice = rayon/.8.0
+let theta =  2.0*.3.14/.float_of_int ring
+
+let fac_newt = 0.01
 let animate = true

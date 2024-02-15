@@ -18,26 +18,26 @@ let amortisseur src dst d =
 
 let gaz src dst vol =
   (*thanks Maciej Matyka*)
-  let n = normal src.pos dst.pos in
+  let n = normal dst.pos src.pos in
   n*$ 
-    ((-1.0/.vol) *. (dist src.pos dst.pos) *. nrT)
+    ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT)
 
 let bilan_des_forces s i l k_ressort penche =
-  let volume = 
+  let volume =
+  
     let maxx, maxy, minx, miny = Graph.fold_left 
       (fun (maxx,maxy,minx,miny) (x,y) -> max maxx x, max maxy y,min minx x, min miny y) 
         (fst l.(0).pos, snd l.(0).pos,fst l.(0).pos, snd l.(0).pos) 
         (Graph.map (fun x ->x.pos) l) in  ((maxy-.miny)*.(maxx-.minx))/.1000.0 (* on suppose que c'est un carré*)
-  in
-  (*let gaussian_volume =
+  (*in
     let v i src =  
-        let dst = l.((i+1) mod n ) in
+        let dst = l.(Graph.droite i) in
           0.5 
           *. abs_f (fst src.pos -. fst dst.pos) 
           *. abs_f (fst (normal src.pos dst.pos))
           *. dist src.pos dst.pos
-    in Graph.fold_left (+.) 0.0 (Graph.mapi v l)
-  in*)
+    in Graph.fold_left (+.) 0.0 (Graph.mapi v l)*)
+  in 
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), yellow; (*champs de pesanteur*) 
        gaz s l.(Graph.gauche i) volume, green;

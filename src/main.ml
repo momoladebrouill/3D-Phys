@@ -34,11 +34,10 @@ let rec loop st =
     let midpos = Vector2.create (pxf st.l.(0).pos) (pyf st.l.(0).pos) in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->
-        let fac_newt = 0.1 in
         let f =  (bilan_des_forces s i st.l st.k_ressort st.penche) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> 
-            let end_force = s.pos +$ (f *$ (fac_newt*.st.z)) in 
+            let end_force = s.pos +$ (f *$ (fac_newt)) in 
              begin (*draw arrow*)
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) col;
             let dir = (end_force -$ s.pos) in

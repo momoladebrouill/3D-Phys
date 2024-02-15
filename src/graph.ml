@@ -16,8 +16,8 @@ let ( +%) a b = try
 
 let initial () = 
   Array.of_list 
-    (List.map (fun (x,y,mult) ->  
-          let r = rayon +. foi mult *. d_eq_rayon in
+    (List.map (fun (x,y,ind_anneau) ->  
+          let r = rayon +. foi ind_anneau *. interstice in
           {
               pos = foi (w/2) +. x *. r,  y*.r;
               vit = 0.0,0.0;
@@ -39,22 +39,26 @@ let droite i = i/ring * ring + (i+ring-1) mod ring
 
 (*relié au suivant et au précédent*)
 let linked_to i = 
-   let d = d_eq *.(rayon +. d_eq_rayon *. foi (i/ring) ) in 
+   let ind_anneau = i/ring in
+   let d = 2.0*.(rayon +. foi ind_anneau *. interstice) *. sin (theta/.2.0)  in 
   [
     (*sur mon anneau*)
     (i/ring) * ring + ((i+1) mod ring), d;
-    (i/ring) * ring + ((ring+i-1) mod ring),d  ;
+    (i/ring) * ring + ((ring+i-1) mod ring),d;
   ]
- (*connecter les anneaux*)
+ (*connecter les anneaux *)
+
   @ if i/ring+1 = rings then [] else  
+    let c = (interstice**2.0 +. (d +. interstice*.sin (theta/.2.0))**2.0) |> sqrt  in
   [
-    ring * (i/ring+1) + (i mod ring), d_eq_rayon; 
-    ring * (i/ring+1) + ((i+1) mod ring), d_eq_rayon; 
-    ring * (i/ring+1) + ((i+ring-1) mod ring), d_eq_rayon; 
+    ring * (i/ring+1) + (i mod ring), interstice; 
+    ring * (i/ring+1) + ((i+1) mod ring), c; 
+    ring * (i/ring+1) + ((i+ring-1) mod ring), c; 
   ] 
   @ if i/ring = 0 then [] else  
+    let c = (interstice**2.0 +. (d -. interstice*.sin (theta/.2.0))**2.0) |> sqrt  in
   [
-    ring * (i/ring-1) + (i mod ring), d_eq_rayon; 
-    ring * (i/ring-1) + ((i+1) mod ring), d_eq_rayon; 
-    ring * (i/ring-1) + ((i+ring-1) mod ring), d_eq_rayon; 
+    ring * (i/ring-1) + (i mod ring), interstice; 
+    ring * (i/ring-1) + ((i+1) mod ring), c; 
+    ring * (i/ring-1) + ((i+ring-1) mod ring), c; 
   ] 
