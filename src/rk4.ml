@@ -27,7 +27,7 @@ let fix_floor p =
 let f _ y y' args = 
   let points = to_points y y' args.l in
   Graph.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points  args.k_ressort args.penche) *$ (1.0/.p.mass)) points 
+    somme_forces (bilan_des_forces p i points args.penche) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 

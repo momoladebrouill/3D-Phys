@@ -4,48 +4,46 @@ open Constantes
 type force = point * Raylib.Color.t
 
 (*force elastique avec les autres *)
-let ressort a b l0 k = 
-    vect_elem b.pos a.pos *$ (-.k*.(dist a.pos b.pos -.l0))
+let ressort src dst l0 = vect_elem dst.pos src.pos *$ 
+  (-.k_ressort*.(dist src.pos dst.pos -.l0))
 
 (*force de repulstion avec les voisins*)
-let repultion a b  = 
-    vect_elem b.pos a.pos *$ (k_rep/.(dist a.pos b.pos)**4.0)
+let repultion src dst  = vect_elem dst.pos src.pos *$ 
+  (k_repultion/.(dist src.pos dst.pos)**4.0)
 
 (*force damped avec les autres *)
-let amortisseur src dst d = 
+let amortisseur src dst = 
     let er = vect_elem src.pos dst.pos in
-    er *$ (d *. ps (src.vit -$ dst.vit) er)
+    er *$ 
+  (k_damping *. ps (src.vit -$ dst.vit) er)
 
-let gaz src dst vol =
-  (*thanks Maciej Matyka*)
-  let n = normal dst.pos src.pos in
-  n*$ 
-    ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT)
+let gaz n_anneau src dst vol = normal dst.pos src.pos *$ 
+   ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT *. (1.0 +. foi n_anneau *. p0)) 
 
-let bilan_des_forces s i l k_ressort penche =
-  let volume =
-  
-    let maxx, maxy, minx, miny = Graph.fold_left 
-      (fun (maxx,maxy,minx,miny) (x,y) -> max maxx x, max maxy y,min minx x, min miny y) 
-        (fst l.(0).pos, snd l.(0).pos,fst l.(0).pos, snd l.(0).pos) 
-        (Graph.map (fun x ->x.pos) l) in  ((maxy-.miny)*.(maxx-.minx))/.1000.0 (* on suppose que c'est un carré*)
-  (*in
-    let v i src =  
+let bilan_des_forces s i l penche =
+  let volumes = Array.make rings 0.0 in
+  let minx = Graph.fold_left min (fst l.(0).pos) (Graph.map (fun x -> fst x.pos) l) in
+  let v i src =  
+        let t = 
         let dst = l.(Graph.droite i) in
-          0.5 
-          *. abs_f (fst src.pos -. fst dst.pos) 
-          *. abs_f (fst (normal src.pos dst.pos))
+           (fst src.pos -. minx) 
+          *. (fst (normal src.pos dst.pos))
           *. dist src.pos dst.pos
-    in Graph.fold_left (+.) 0.0 (Graph.mapi v l)*)
-  in 
+        in volumes.(i/ring)<-volumes.(i/ring)+.t
+    in Graph.iteri v l;
+ 
    [
     (penche*.5.0,9.81) *$ (1.0*.s.mass), yellow; (*champs de pesanteur*) 
-       gaz s l.(Graph.gauche i) volume, green;
-       gaz l.(Graph.droite i) s volume, green;
-  ] @ List.concat 
+   ] @
+   let volume = volumes.(i/ring) in
+   [
+       gaz (i/ring) s l.(Graph.gauche i) volume, green;
+       gaz (i/ring) l.(Graph.droite i) s volume, green;
+   ]
+   @ List.concat 
     (List.map (fun (i,d) -> 
          [
-            ressort s l.(i) d k_ressort, blue;
-            amortisseur s l.(i) damping, raywhite;
+            ressort s l.(i) d , blue;
+            amortisseur s l.(i), raywhite;
             repultion s l.(i), red;
          ]) (Graph.linked_to i)) 
