@@ -33,7 +33,7 @@ let bilan_des_forces src i l penche =
     in Graph.iteri v l;
  
    [
-    (penche*.5.0,9.81) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
+    (gravity +$ if penche then (5.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
    ] @
    let volume = volumes.(i/ring) in
    [

@@ -9,7 +9,7 @@ exception Superposition of int
 type args = {
   l : point array;
   k_ressort : float;
-  penche : float
+  penche : bool
 }
 
 (*creation d'un tableau de points a partir d'un tableau de positions et de vitesses*)

@@ -10,7 +10,7 @@ type status = {
     z : float; (*zoom*) 
     shift : vec; (*shift de la cam*)
     k_ressort : float; (*la constante de ressort*)
-    penche : float; (*1.0 ou 0.0 selon si la gravité est inclinée*)
+    penche : bool; (*5.0 ou 0.0 selon si la gravité est inclinée ou non*)
 }
 
 
@@ -72,7 +72,7 @@ F pour le mode forces
 Arrows pour le deplacement
 Space pour le saut temporel
 Q pour recentrer
-R pour la bascule
+R pour la bascule (" ^ string_of_bool st.penche ^ ")
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
     ) 10 20 20 Color.raywhite;
   end_drawing ()
@@ -93,7 +93,7 @@ let rec loop st =
   in
   let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
   let ideal = foi (w/2), foi (h/2) in
-  let shift' = if is_key_down Key.A then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
+  let shift' = if st.penche then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
   let l' = Domain.join integrationDomain in
   loop {
       t = st.t + 1;
@@ -101,7 +101,7 @@ let rec loop st =
       shift = shift';
       z = max 0.0 (st.z +. let vitesse = 0.01 in if is_key_down Key.Kp_add then vitesse else if is_key_down Key.Kp_subtract then -.vitesse else 0.0) ;
       k_ressort = max 0.0 (st.k_ressort +. let vitesse = 1.0 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
-      penche = if is_key_down Key.R then 1.0 else 0.0
+      penche = if is_key_pressed Key.R then not st.penche else st.penche;
   }
 
 let setup () =
@@ -113,7 +113,7 @@ let setup () =
       l = Graph.initial ();
       shift = zero;
       z = 1.0;
-      penche = 0.0;
+      penche = false;
       k_ressort = k_ressort;
   }
   else failwith "window not ready"
