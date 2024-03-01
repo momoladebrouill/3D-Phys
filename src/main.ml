@@ -18,48 +18,51 @@ let couleur_fond = Color.create 0 0 100 1
 let draw st = 
   let pxf (x,_) = (x *. st.z +. (fst st.shift)) in
   let pyf (_,y)= (y *. st.z +. (snd st.shift)) in
-  let draw_tri a b c col =
-  draw_triangle  
-    (Vector2.create (pxf a.pos) (pyf a.pos))
-    (Vector2.create (pxf b.pos) (pyf b.pos))
-    (Vector2.create (pxf c.pos) (pyf c.pos))
-    col
-  in
   let px a = a |> pxf |> iof in 
   let py a = a |> pyf |> iof in
+  let draw_tri a b c col =
+      draw_triangle  
+        (Vector2.create (pxf a) (pyf a))
+        (Vector2.create (pxf b) (pyf b))
+        (Vector2.create (pxf c) (pyf c))
+        col
+      in
+  let draw_vec src f col = 
+            let f = f *$ fac_newt in
+            let end_force = src +$ f in 
+             begin (*draw arrow*)
+            draw_line (px src) (py src) (px end_force) (py end_force) col;
+            let pi = 3.14159265359 in
+            let angl = 2.0*.pi/.(norme f) in
+            let dir_left = end_force -$ ((rotate f angl) *$ 0.25) in
+            let dir_right = end_force -$ ((rotate f (-.angl)) *$ 0.25) in
+            draw_tri dir_left dir_right end_force col;
+            end in
   begin_drawing ();
-  clear_background couleur_fond;
+  draw_rectangle 0 0 w h (fade Color.black 0.01);
     let posa = (0, foi h)  in
     let midpos = Graph.random st.l in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->
         let f =  (bilan_des_forces s i st.l st.penche) in
         if is_key_down Key.F then (*juste les forces*)
-          List.iter (fun (f,col) -> 
-            let end_force = s.pos +$ (f *$ (fac_newt)) in 
-             begin (*draw arrow*)
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) col;
-            let dir = (end_force -$ s.pos) in
-            let dir = dir /$ (norme dir) in
-            let dir_left = rotate dir (3.14/.4.0) in
-            let dir_right = rotate dir (-3.14/.4.0) in
-            let dir_left = s.pos +$ dir_left in
-            let dir_right = s.pos +$ dir_right in
-            draw_triangle (Vector2.create (pxf end_force) (pyf end_force)) (Vector2.create (pxf dir_left) (pyf dir_left)) (Vector2.create (pxf dir_right) (pyf dir_right)) col;
-            end
-            ) f
+          List.iter (fun (f,col) -> draw_vec s.pos f col) f
+
         else if is_key_down Key.G then  (* l'accélération*)
-          let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
-            draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
+          draw_vec s.pos (somme_forces f) Color.orange
+
         else if is_key_down Key.S  && i >= ring * (rings-1) then (*la surface*)
-            draw_tri s (droite st.l i) midpos Color.red
-         else if not (is_key_down Key.S) then
-          begin 
-         draw_rectangle  (px s.pos) (py s.pos) 2 2 (Color.raywhite);
-         draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
-          List.iter (fun (posb,_) -> 
-          draw_line (px s.pos) (py s.pos) (px posb.pos) (py posb.pos) Color.raywhite) (linked_to st.l i) 
-          end else ()
+            draw_tri s.pos (droite st.l i).pos midpos.pos Color.red
+
+        else if not (is_key_down Key.S) then
+        begin 
+            (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
+            (*List.iter (fun (posb,_) -> 
+                draw_line (px s.pos) (py s.pos) (px posb.pos) (py posb.pos) Color.raywhite) (linked_to st.l i); *)
+            draw_circle  (px s.pos) (py s.pos) 5.0
+              (fade (color_from_hsv (foi (st.t mod 360)) 1.0 1.0) 0.5);
+        end 
+     
           ) 
       st.l;
   draw_line 10 10 (10 + iof (100.0*.st.z)) 10 Color.white;

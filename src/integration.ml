@@ -26,13 +26,13 @@ let fix_floor p =
 (*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
 let f _ y y' args = 
   let points = to_points y y' args.l in
-  Graph.mapi (fun i p -> if snd p.pos > floor_y+.0.1 then raise (Superposition (i)) else
+  Graph.mapi (fun i p -> if snd p.pos > floor_y then raise (Superposition (i)) else
     somme_forces (bilan_des_forces p i points args.penche) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 
 let rec runge_kunta args iter =   
-  if iter > rk_tries then args.l
+  if iter = 0  then args.l
   else
   try 
       let h =  dt in
@@ -50,14 +50,14 @@ let rec runge_kunta args iter =
       to_points ny ny' args.l
   with Superposition i ->
     args.l.(i) <- fix_floor args.l.(i);
-    runge_kunta args (iter+1)
+    runge_kunta args (iter-1)
 
 let rec verlet args =
       let y' = Graph.map (fun x -> x.vit) args.l in
       let prec = Graph.map (fun x -> x.pos) args.l in
       let current = prec +%  (dt *% y') in 
       try 
-        let next = 2.0 *% current -% prec +% (dt*.dt *% f dt y' prec args) in
+        let next = 2.0 *% current -% prec +% (dt*.dt *% f dt current y' args) in
         to_points next ((1.0 /.dt) *% (next -% current)) args.l
       with Superposition i ->
         args.l.(i) <- fix_floor args.l.(i);
@@ -68,7 +68,7 @@ let rec euler dt args =
   let y = Graph.map (fun x -> x.pos) args.l in
   try 
     let next = y +% (dt *% y') in
-    let next' = y' +% (dt *% f dt y' y args) in
+    let next' = y' +% (dt *% f dt y y' args) in
     to_points next next' args.l
   with Superposition i ->
     args.l.(i) <- fix_floor args.l.(i);
@@ -77,13 +77,13 @@ let rec euler dt args =
 let eulern tries args =
   let rec aux n args =
     if n = 0 then args else
-    let l =  (euler (dt /. (foi tries)) args)
-    in aux (n-1) {l = l; k_ressort = args.k_ressort; penche = args.penche}
+    aux (n-1) {args with l = (euler (dt /. (foi tries)) args)}
   in (aux tries args).l
 
 let integrate args =
   if not animate then args.l else
   match meth with
-  | "rk" -> runge_kunta args 0
-  | "euler" -> eulern 100 args
+  | "rk" -> runge_kunta args tries
+  | "euler" -> eulern tries args
+  | "verlet" -> verlet args
   | _ -> failwith "methode inconnue"
