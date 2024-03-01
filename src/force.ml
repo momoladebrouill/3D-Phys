@@ -20,12 +20,12 @@ let amortisseur src dst =
 let gaz n_anneau src dst vol = normal dst.pos src.pos *$ 
    ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT *. (1.0 +. foi n_anneau *. p0)) 
 
-let bilan_des_forces s i l penche =
+let bilan_des_forces src i l penche =
   let volumes = Array.make rings 0.0 in
-  let minx = Graph.fold_left min (fst l.(0).pos) (Graph.map (fun x -> fst x.pos) l) in
+  let minx = Graph.fold_left min (fst (Graph.random l).pos ) (Graph.map (fun x -> fst x.pos) l) in
   let v i src =  
         let t = 
-        let dst = l.(Graph.droite i) in
+          let dst = Graph.droite l i  in
            (fst src.pos -. minx) 
           *. (fst (normal src.pos dst.pos))
           *. dist src.pos dst.pos
@@ -33,17 +33,17 @@ let bilan_des_forces s i l penche =
     in Graph.iteri v l;
  
    [
-    (penche*.5.0,9.81) *$ (1.0*.s.mass), yellow; (*champs de pesanteur*) 
+    (penche*.5.0,9.81) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
    ] @
    let volume = volumes.(i/ring) in
    [
-       gaz (i/ring) s l.(Graph.gauche i) volume, green;
-       gaz (i/ring) l.(Graph.droite i) s volume, green;
+       gaz (i/ring) src (Graph.gauche l i) volume, green;
+       gaz (i/ring) (Graph.droite l i) src volume, green;
    ]
    @ List.concat 
-    (List.map (fun (i,d) -> 
+    (List.map (fun (dst,d) -> 
          [
-            ressort s l.(i) d , blue;
-            amortisseur s l.(i), raywhite;
-            repultion s l.(i), red;
-         ]) (Graph.linked_to i)) 
+            ressort src dst d , blue;
+            amortisseur src dst, raywhite;
+            repultion src dst, red;
+         ]) (Graph.linked_to l i)) 

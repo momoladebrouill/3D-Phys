@@ -31,7 +31,7 @@ let f _ y y' args =
 
 let mult = ( *%)
 
-let rec runge_kunta args iter = if not animate then args.l else  
+let rec runge_kunta args iter =   
   if iter > rk_tries then args.l
   else
   try 
@@ -51,3 +51,39 @@ let rec runge_kunta args iter = if not animate then args.l else
   with Superposition i ->
     args.l.(i) <- fix_floor args.l.(i);
     runge_kunta args (iter+1)
+
+let rec verlet args =
+      let y' = Graph.map (fun x -> x.vit) args.l in
+      let prec = Graph.map (fun x -> x.pos) args.l in
+      let current = prec +%  (dt *% y') in 
+      try 
+        let next = 2.0 *% current -% prec +% (dt*.dt *% f dt y' prec args) in
+        to_points next ((1.0 /.dt) *% (next -% current)) args.l
+      with Superposition i ->
+        args.l.(i) <- fix_floor args.l.(i);
+        verlet args
+
+let rec euler dt args =
+  let y' = Graph.map (fun x -> x.vit) args.l in
+  let y = Graph.map (fun x -> x.pos) args.l in
+  try 
+    let next = y +% (dt *% y') in
+    let next' = y' +% (dt *% f dt y' y args) in
+    to_points next next' args.l
+  with Superposition i ->
+    args.l.(i) <- fix_floor args.l.(i);
+    euler dt args
+
+let eulern tries args =
+  let rec aux n args =
+    if n = 0 then args else
+    let l =  (euler (dt /. (foi tries)) args)
+    in aux (n-1) {l = l; k_ressort = args.k_ressort; penche = args.penche}
+  in (aux tries args).l
+
+let integrate args =
+  if not animate then args.l else
+  match meth with
+  | "rk" -> runge_kunta args 0
+  | "euler" -> eulern 100 args
+  | _ -> failwith "methode inconnue"

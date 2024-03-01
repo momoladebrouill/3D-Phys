@@ -7,6 +7,7 @@ let rk_tries = 10
 (*Affichage*)
 let fac_newt = 0.01 
 let animate = true 
+let meth = "euler"
 let w = 16*120
 let h = 9*120
 
@@ -25,7 +26,7 @@ let p0 = 0.4 (*facteur d'augmentation de n pour chaque anneau*)
 
 (*Taille du blob *)
 let rayon = 100.0 (* rayon du premier anneau*)
-let rings = 3 (*nombre d'anneaux*)
+let rings = 5 (*nombre d'anneaux*)
 let ring = 10 (*nombre de points par anneaux*)
 let n = rings * ring (*nombre de points*)
 let d_eq = 2.0 *. 3.14/. (float_of_int ring) (*longeur d'equilibre des ressorts (m)*)

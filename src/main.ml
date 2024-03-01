@@ -2,7 +2,6 @@ open Raylib
 open Force
 open Maths  
 open Constantes
-open Rk4
 open Graph
 
 type status = {
@@ -16,22 +15,22 @@ type status = {
 
 
 let couleur_fond = Color.create 0 0 100 1
-
-let rec loop st =
-  if Raylib.window_should_close () then Raylib.close_window () else 
-  
-  let integrationDomain = Domain.spawn (fun _ -> Rk4.runge_kunta {l=st.l;k_ressort = st.k_ressort;penche = st.penche} 0) in
+let draw st = 
   let pxf (x,_) = (x *. st.z +. (fst st.shift)) in
   let pyf (_,y)= (y *. st.z +. (snd st.shift)) in
+  let draw_tri a b c col =
+  draw_triangle  
+    (Vector2.create (pxf a.pos) (pyf a.pos))
+    (Vector2.create (pxf b.pos) (pyf b.pos))
+    (Vector2.create (pxf c.pos) (pyf c.pos))
+    col
+  in
   let px a = a |> pxf |> iof in 
   let py a = a |> pyf |> iof in
-  let time_jumping = not (is_key_down Key.Space) in
-  if time_jumping || st.t mod 30 = 0 then begin 
-        (*affichage*)
   begin_drawing ();
   clear_background couleur_fond;
     let posa = (0, foi h)  in
-    let midpos = Vector2.create (pxf st.l.(0).pos) (pyf st.l.(0).pos) in 
+    let midpos = Graph.random st.l in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->
         let f =  (bilan_des_forces s i st.l st.penche) in
@@ -52,14 +51,14 @@ let rec loop st =
         else if is_key_down Key.G then  (* l'accélération*)
           let end_force = s.pos +$ ((somme_forces f) *$ (fac_newt*.st.z)) in 
             draw_line (px s.pos) (py s.pos) (px end_force) (py end_force) Color.orange
-        else if is_key_down Key.S  && i < ring (* ring * (rings-1)*) then (*la surface*)
-            draw_triangle (Vector2.create (pxf s.pos) (pyf s.pos)) (Vector2.create (pxf st.l.(droite i).pos) (pyf st.l.(droite i).pos)) midpos Color.red
+        else if is_key_down Key.S  && i >= ring * (rings-1) then (*la surface*)
+            draw_tri s (droite st.l i) midpos Color.red
          else if not (is_key_down Key.S) then
           begin 
-         draw_rectangle  (px s.pos) (py s.pos) 2 2 (if List.exists (fun (j,_)->snd st.l.(j).pos < snd s.pos) (linked_to i) then Color.raywhite else Color.red);
+         draw_rectangle  (px s.pos) (py s.pos) 2 2 (Color.raywhite);
          draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;
           List.iter (fun (posb,_) -> 
-          draw_line (px s.pos) (py s.pos) (px st.l.(posb).pos) (py st.l.(posb).pos) Color.raywhite) (linked_to i) 
+          draw_line (px s.pos) (py s.pos) (px posb.pos) (py posb.pos) Color.raywhite) (linked_to st.l i) 
           end else ()
           ) 
       st.l;
@@ -73,8 +72,13 @@ Q pour recentrer
 R pour la bascule
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
     ) 10 20 20 Color.raywhite;
-  end_drawing ();
-  end;
+  end_drawing ()
+
+let rec loop st =
+  if Raylib.window_should_close () then Raylib.close_window () else 
+  let integrationDomain = Domain.spawn (fun _ -> Integration.integrate {l=st.l;k_ressort = st.k_ressort;penche = st.penche}) in
+  let time_jumping = not (is_key_down Key.Space) in
+  if time_jumping || st.t mod 30 = 0 then draw st;
   let vitesse = -10.0 in
   let shift' = List.fold_left (+$) st.shift
       [

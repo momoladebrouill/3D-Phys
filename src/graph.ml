@@ -11,6 +11,7 @@ let iteri = Array.iteri
 
 let ( *%) q = map (fun t-> t *$ q)
 let ( +%) = map2 (+$) 
+let ( -%) = map2 (-$) 
 
 (* le graphe initial*)
 let initial () = 
@@ -32,20 +33,27 @@ let initial () =
        )
       )
 
+let random l = l.(0)
+
 (*dans mon anneau, celui à ma gauche*)
-let gauche i = i/ring * ring + (i+1) mod ring
+let gauche_formule i = i/ring * ring + (i+1) mod ring
+let gauche l i = l.(gauche_formule i)
 
 (*dans mon anneau, celui à ma droite*)
-let droite i = i/ring * ring + (i+ring-1) mod ring
+let droite_formule i = i/ring * ring + (i+ring-1) mod ring
+let droite l i = l.(droite_formule i)
+
+(*dans mon anneau, celui en face*)
 
 (*renvoie la liste des indices des voisins*)
-let linked_to i = 
+let linked_to l i =
+    List.map (fun (i,d) -> l.(i),d) begin
    let ind_anneau = i/ring in
    let d = 2.0*.(rayon +. foi ind_anneau *. interstice) *. sin (theta/.2.0)  in 
   [
     (*sur mon anneau*)
-    gauche i, d;
-    droite i,d;
+    gauche_formule i, d;
+    droite_formule i,d;
   ]
  (*  connecter les anneaux   *)
   (*celui autour*)
@@ -63,4 +71,4 @@ let linked_to i =
     ring * (ind_anneau-1) + (i mod ring), interstice; 
     ring * (ind_anneau-1) + ((i+1) mod ring), c; 
     ring * (ind_anneau-1) + ((i+ring-1) mod ring), c; 
-  ] 
+  ] end
