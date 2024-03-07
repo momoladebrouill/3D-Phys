@@ -1,16 +1,9 @@
 open Maths
 open Constantes
-open Force
 open Graph
-
+open Force
 exception Superposition of int
 
-(*arguments de la fonction f*)
-type args = {
-  l : point array;
-  k_ressort : float;
-  penche : bool
-}
 
 (*creation d'un tableau de points a partir d'un tableau de positions et de vitesses*)
 let to_points y y' l =
@@ -27,7 +20,7 @@ let fix_floor p =
 let f _ y y' args = 
   let points = to_points y y' args.l in
   Graph.mapi (fun i p -> if snd p.pos > floor_y then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points args.penche) *$ (1.0/.p.mass)) points 
+    somme_forces (bilan_des_forces p i points args) *$ (1.0/.p.mass)) points 
 
 let mult = ( *%)
 

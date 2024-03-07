@@ -29,12 +29,6 @@ let vect_elem (xa,ya) (xb,yb) =
     let d = dist (xa,ya) (xb,yb) in
     ((xb-.xa)/.d,(yb-.ya)/.d)
 
-let cross (a1,a2,a3) (b1,b2,b3) =
-  (
-    a2 *. b3 -. a3 *. b2,
-    a3 *. b1 -. a1 *. b3,
-    a1 *. b2 -. a2 *. b1
-   )
 
 let normal (xa,ya) (xb,yb) = (*calcul du vecteur unitaire normal à la droite reliant les points a et b*)
 (* actually, on calcule le produit vectoriel avec un vecteur de la troisème dimention omg

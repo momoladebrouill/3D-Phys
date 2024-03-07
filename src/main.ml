@@ -15,6 +15,7 @@ type status = {
 
 
 let couleur_fond = Color.create 0 0 100 1
+
 let draw st = 
   let pxf (x,_) = (x *. st.z +. (fst st.shift)) in
   let pyf (_,y)= (y *. st.z +. (snd st.shift)) in
@@ -39,12 +40,12 @@ let draw st =
             draw_tri dir_left dir_right end_force col;
             end in
   begin_drawing ();
-  draw_rectangle 0 0 w h (fade Color.black 0.01);
+  draw_rectangle 0 0 w h (fade couleur_fond 0.9);
     let posa = (0, foi h)  in
     let midpos = Graph.random st.l in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Graph.iteri (fun i s ->
-        let f =  (bilan_des_forces s i st.l st.penche) in
+        let f =  (bilan_des_forces s i st.l {penche = st.penche; l = st.l; k_ressort = st.k_ressort}) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> draw_vec s.pos f col) f
 
@@ -59,8 +60,7 @@ let draw st =
             (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
             (*List.iter (fun (posb,_) -> 
                 draw_line (px s.pos) (py s.pos) (px posb.pos) (py posb.pos) Color.raywhite) (linked_to st.l i); *)
-            draw_circle  (px s.pos) (py s.pos) 5.0
-              (fade (color_from_hsv (foi (st.t mod 360)) 1.0 1.0) 0.5);
+            draw_circle  (px s.pos) (py s.pos) 5.0 Color.yellow;
         end 
      
           ) 
