@@ -40,7 +40,7 @@ let draw st =
             draw_tri dir_left dir_right end_force col;
             end in
   begin_drawing ();
-  draw_rectangle 0 0 w h (fade couleur_fond 0.9);
+  clear_background couleur_fond;
     let posa = (0, foi h)  in
     let midpos = Graph.random st.l in 
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
@@ -58,8 +58,10 @@ let draw st =
         else if not (is_key_down Key.S) then
         begin 
             (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
-            (*List.iter (fun (posb,_) -> 
-                draw_line (px s.pos) (py s.pos) (px posb.pos) (py posb.pos) Color.raywhite) (linked_to st.l i); *)
+            List.iter (fun (posb,_) ->
+                 let a  = Vector2.create (pxf s.pos) (pyf s.pos) in
+                 let b  = Vector2.create (pxf posb.pos) (pyf posb.pos) in
+                draw_line_ex a b 2.0 Color.raywhite) (linked_to st.l i); 
             draw_circle  (px s.pos) (py s.pos) 5.0 Color.yellow;
         end 
      
