@@ -17,7 +17,7 @@ let mass = 25.0 (*masses des particules (kg)*)
 let k_ressort = 1e3 (*constante de raideur (N/m)*)
 let k_damping = -150.0 (*constante d'amortissement du ressort*)
 let k_repultion = 10.0 (*constante en k_rep/r**4*)
-let gravity = (0.0,9.81) (*champ gravitationnel m.s-2*)
+let gravity = (0.0,0.0,-9.81) (*champ gravitationnel m.s-2*)
 let nRT = 1e6 (* facteur de corrélation entre la pression et le volume*)
 let p0 = 0.4 (*facteur d'augmentation de n pour chaque anneau*) 
 
