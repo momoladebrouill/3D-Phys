@@ -5,12 +5,12 @@ let h = 9*120
 let floor_y = float_of_int h  (*La hauteur du sol, c'est la taille de l'écran par hasard*)
 
 (* --- Constantes d'intégration --- *)
-let meth = "rk" (*euler,rk,verlet*) (*méthode d'intégration*)
+let meth = "euler" (*euler,rk,verlet*) (*méthode d'intégration*)
 let tries = 5 (* Nombre d'essais max pour Runge-Kutta 4 lors de problème de collision. 
 Au dela de cette quantité, il renvoie le problème à l'instant t+dt.
 Pour les autres méthodes, c'est le nombre de sous-iterations *)
-let animate = true 
-let dt = 1.0/.60.0 (*pas de temps (s)*) 
+let animate = true
+let dt = 1.0 (*pas de temps (s)*) 
 
 (* --- Constantes physiques --- *)
 let mass = 25.0 (*masses des particules (kg)*)

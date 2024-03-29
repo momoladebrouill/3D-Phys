@@ -19,7 +19,7 @@ let initial () =
     (List.map (fun (x,y,ind_anneau) ->  
           let r = rayon +. foi ind_anneau *. interstice in
           {
-              pos = x*.r,x*.r,y*.r +. 2.0*.r;
+              pos = x*.r,0.0,y*.r +.rayon +. interstice*.(foi rings);
               vit = 0.0,0.0,0.0;
               mass = mass; 
           })

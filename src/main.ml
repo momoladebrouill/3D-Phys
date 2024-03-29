@@ -4,16 +4,7 @@ open Maths
 open Constantes
 open Graph
 
-type direction = {
-  vertical : float;
-  horizontal : float;
-}
 
-type camera_status = {
-    camera : Camera3D.t;
-    position : vec;
-    target : direction;
-}
 
 type status = {
     t : int; (*temps*)
@@ -22,7 +13,7 @@ type status = {
     shift : vec; (*shift de la cam*)
     k_ressort : float; (*la constante de ressort*)
     penche : bool; (*5.0 ou 0.0 selon si la gravité est inclinée ou non*)
-    cam : camera_status;
+    cam : Camera3D.t;
 }
 
 
@@ -52,19 +43,11 @@ let draw st =
             draw_tri dir_left dir_right end_force col;
             end in*)
   begin_drawing ();
-  let s = st.cam in
-  let dir = (
-      cos s.target.horizontal *. cos s.target.vertical,
-      cos s.target.horizontal *. sin s.target.vertical,
-      sin s.target.horizontal
-      ) in
   clear_background Color.black;
-  begin_mode_3d s.camera;
-     draw_cube zero_r 1.0 1.0 1.0 Color.raywhite; 
-     draw_cube zero_r 10.0 1.0 10.0 Color.raywhite; 
-     draw_grid 100 10.0;
-     Camera3D.set_position s.camera (r3_to_vec3 s.position);
-     Camera3D.set_target s.camera (r3_to_vec3 (s.position +$ (dir *$ 5.))); 
+  begin_mode_3d st.cam;
+  draw_cube zero_r 1.0 1.0 1.0 Color.raywhite; 
+  draw_cube zero_r 10.0 1.0 10.0 Color.raywhite; 
+  draw_grid 100 10.0;
     let posa = (0, foi h)  in
     let midpos = Graph.random st.l in 
     (*draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; *)
@@ -106,36 +89,19 @@ let draw st =
      begin_drawing ();
      end_drawing ()
 
-let update_cam s =
-   let pos' = s.position 
-          +$ ((if is_key_down Key.W then (1.0,0.,0.) else (0.,0.,0.) +$ if is_key_down Key.S then (-1.0,0.,0.) else (0.,0.,0.)) *$ sin s.target.horizontal)
-          +$ ((if is_key_down Key.A then (0.,1.0,0.) else (0.,0.,0.) +$ if is_key_down Key.D then (0.,-1.0,0.) else (0.,0.,0.)) *$ cos s.target.horizontal)
-          +$ if is_key_down Key.Space then (0.,0.,1.0) else (0.,0.,0.) +$ if is_key_down Key.Left_shift then (0.,0.,-1.0) else (0.,0.,0.)
-          in
-    let target' = {
-          horizontal = s.target.horizontal +. 0.02*.(if is_key_down Key.Up then 1.0 else 0.0 -. if is_key_down Key.Down then 1.0 else 0.0);
-          vertical = s.target.vertical +. 0.02*.(if is_key_down Key.Right then 1.0 else 0.0 -. if is_key_down Key.Left then 1.0 else 0.0);
-      } in
-    {s with position = pos'; target = target'}
 
 let rec loop st =
   if Raylib.window_should_close () then Raylib.close_window () else 
   let integrationDomain = Domain.spawn (fun _ -> Integration.integrate {l=st.l;k_ressort = st.k_ressort;penche = st.penche}) in
   let time_jumping = not (is_key_down Key.I) in
   if time_jumping || st.t mod 30 = 0 then draw st;
-  let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) 
+  let rmed = r3_to_vec3 ((Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n))) 
   in
-  (*let vitesse = -10.0 in
-  let shift' = List.fold_left (+$) st.shift
-      [
-          if is_key_down Key.Up then 0.0,-.vitesse,0.0 else zero; 
-          if is_key_down Key.Down then 0.0,vitesse,0.0 else zero; 
-          if is_key_down Key.Left then -.vitesse,0.0,0.0 else zero; 
-          if is_key_down Key.Right then vitesse,0.0,0.0 else zero; 
-     ] 
-  in*)
-  (*let ideal = foi (w/2), foi (h/2),0.0 in
-  let shift' = if st.penche then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in*)
+  
+  update_camera (addr st.cam) CameraMode.Third_person;
+  Vector3.set_x (Camera3D.target st.cam) (Vector3.x rmed);
+  Vector3.set_y (Camera3D.target st.cam) (Vector3.y rmed);
+  Vector3.set_z (Camera3D.target st.cam) (Vector3.z rmed);
   let l' = Domain.join integrationDomain in
   loop {
       t = st.t + 1;
@@ -144,13 +110,21 @@ let rec loop st =
       z = max 0.0 (st.z +. let vitesse = 0.01 in if is_key_down Key.Kp_add then vitesse else if is_key_down Key.Kp_subtract then -.vitesse else 0.0) ;(*zoom*)
       k_ressort = max 0.0 (st.k_ressort +. let vitesse = 1.0 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
       penche = if is_key_pressed Key.R then not st.penche else st.penche;
-      cam = update_cam st.cam 
+      cam = st.cam 
   }
 
 let setup () =
   Raylib.init_window w h "Blob";
   Raylib.set_target_fps 60;
   if is_window_ready () then
+    let camera = Camera3D.create zero_r zero_r (Vector3.create 0. 1. 0.) 45. CameraProjection.Perspective 
+    in let open Camera3D in
+    set_position camera (Vector3.create 0. 2. 4.);
+    set_target camera (Vector3.create 0. 2. 0.);
+    set_up camera (Vector3.create 0. 1. 0.);
+    set_fovy camera 120.;
+    set_projection camera CameraProjection.Perspective;
+    disable_cursor ();
   {
       t = 0;
       l = Graph.initial ();
@@ -158,14 +132,7 @@ let setup () =
       z = 1.0;
       penche = false;
       k_ressort = k_ressort;
-      cam = {
-        camera = Camera3D.create zero_r zero_r (Vector3.create 0. 1. 0.) 45. CameraProjection.Perspective;
-        position = (0.0,-20.0,10.0);
-        target = {
-            vertical = 0.0;
-            horizontal = 0.0;
-        }
-      }
+      cam = camera;
   }
   else failwith "window not ready"
 
