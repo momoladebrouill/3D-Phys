@@ -136,5 +136,6 @@ let setup () =
 
 let () =  
   setup () |> loop;
+  Icosphere.demo ()
 
   
