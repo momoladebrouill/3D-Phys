@@ -19,8 +19,9 @@ let fix_floor p =
 (*fonction qui donne l'acceleration en fonction de dt, la position et la vitesse*)
 let f _ y y' args = 
   let points = to_points y y' args.l in
-  Graph.mapi (fun i p -> if trd p.pos < 0.0  then raise (Superposition (i)) else
-    somme_forces (bilan_des_forces p i points args) *$ (1.0/.p.mass)) points 
+  Graph.mapi (fun i p -> 
+    if trd p.pos < 0.0  then raise (Superposition i)  
+    else somme_forces (bilan_des_forces p i points args) /$ p.mass) points
 
 let mult = ( *%)
 

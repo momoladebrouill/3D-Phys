@@ -27,18 +27,9 @@ let amortisseur src dst =
 let gaz n_anneau src dst vol = normal dst.pos src.pos *$ 
    ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT *. (1.0 +. foi n_anneau *. p0)) 
 
-let bilan_des_forces src i l {penche;k_ressort} =
-  let volumes = Array.make rings 0.0 in
-  let minx = Graph.fold_left min (fst (Graph.random l).pos ) (Graph.map (fun x -> fst x.pos) l) in
-  let v i src =  
-        let t = 
-          let dst = Graph.droite l i  in
-           (fst src.pos -. minx) 
-          *. (fst (normal src.pos dst.pos))
-          *. dist src.pos dst.pos
-        in volumes.(i/ring)<-volumes.(i/ring)+.t
-    in Graph.iteri v l;
- 
+let bilan_des_forces src i l {penche;k_ressort} =  
+  let maxix, miny = Graph.fold_left (fun (i,a) x -> min x i, max x a) (fst (Graph.random l).pos, fst (Graph.random l).pos) (Graph.map (fun x -> fst x.pos) l) in
+  let volumes = Array.make rings (maxix -. miny) in
    [
     (gravity +$ if penche then (5.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
    ] @
@@ -54,3 +45,4 @@ let bilan_des_forces src i l {penche;k_ressort} =
             amortisseur src dst, raywhite;
             repultion src dst, red;
          ]) (Graph.linked_to l i)) 
+         

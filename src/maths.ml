@@ -9,6 +9,7 @@ type point = {
 let fst (a,_,_) = a
 let snd (_,b,_) = b
 let trd (_,_,c) = c
+
 let r3_to_vec3 pos =
     let x,y,z = pos in
     Raylib.Vector3.create x z y
@@ -42,7 +43,7 @@ let normal (xa,ya,za) (xb,yb,zb) = (*calcul du vecteur unitaire normal à la dro
   let (x0,y0,_) = cross (0.,0.,1.) (x,y,0.) in
   vect_elem zero (x0,y0)*)
   let d = dist (xa,ya,za) (xb,yb,zb) in
-    ((ya-.yb)/.d,(xb-.xa)/.d,(za-.zb)/.d)
+    ((yb-.ya)/.d,(xb-.xa)/.d,(za-.zb)/.d)
   (*if abs_f (yb -.ya) < 1.0 then (0.0,sign_f (ya-.yb)) 
   else 
   let c = (xb-.xa) /. (yb -. ya)

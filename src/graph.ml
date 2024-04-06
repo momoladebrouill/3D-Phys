@@ -16,10 +16,10 @@ let ( -%) = map2 (-$)
 (* le graphe initial*)
 let initial () = 
   Array.of_list 
-    (List.map (fun (x,y,ind_anneau) ->  
+    (List.map (fun (x,y,z,ind_anneau) ->  
           let r = rayon +. foi ind_anneau *. interstice in
           {
-              pos = x*.r,0.0,y*.r +.rayon +. interstice*.(foi rings);
+              pos = x*.r,y,z*.r +.rayon +. interstice*.(foi rings);
               vit = 0.0,0.0,0.0;
               mass = mass; 
           })
@@ -27,7 +27,7 @@ let initial () =
        List.concat 
         (List.init rings 
           (fun ring_no -> List.init ring 
-            (fun i-> let theta = 2.0*.3.14*.(foi i)/.(foi ring) in cos theta, sin theta, ring_no)
+            (fun i-> let theta = 2.0*.3.14*.(foi i)/.(foi ring) in cos theta,0.0, sin theta, ring_no)
           )
         )
        )
