@@ -1,4 +1,5 @@
 open Maths
+let deep = 2 (*nombre d'iteration en detail pour la sphère ico*)
 let x = 0.525731112119133606
 let z = 0.850650808352039932
 let n = 0.0
@@ -67,5 +68,5 @@ let icosphere, indices_triangles =
   let rec aux n (positions,triangles) =
     if n = 0 then positions,triangles
     else aux (n-1) (subdivide positions triangles)
-  in aux 2 (icosahedron,indices_triangles)
+  in aux deep (icosahedron,indices_triangles)
 let n = Array.length icosphere

@@ -19,6 +19,7 @@ let couleur_fond = Color.create 0 0 100 1
 
 let draw st = 
   let draw_tri a b c =
+      let b,c = if det3 a b c >= 0.0 then b,c else c,b in
       draw_triangle_3d  
         (r3_to_vec3 a)
         (r3_to_vec3 b)

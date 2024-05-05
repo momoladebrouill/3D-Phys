@@ -31,7 +31,8 @@ let dist_square (xa,ya,za) (xb,yb,zb) = (xa-.xb)**2.0 +. (ya-.yb)**2.0 +. (za-.z
 let dist a b = sqrt (dist_square a b)
 let norme = dist zero
 
-
+let det3 (a,b,c) (d,e,f) (g,h,i) =
+  a *. (e*.i -. h*.f) -. d*. (b*.i -. h*.c) +. g*. (b*.f -. e*.c)
 let vect_elem (xa,ya,za) (xb,yb,zb) =
     let d = dist (xa,ya,za) (xb,yb,zb) in
     ((xb-.xa)/.d,(yb-.ya)/.d,(zb-.za)/.d)

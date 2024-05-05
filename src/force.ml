@@ -38,7 +38,7 @@ let bilan_des_forces src i l {penche;k_ressort} =
    @ List.concat 
     (List.map (fun (dst,d) -> 
          [
-            ressort src dst d k_ressort, blue;
+            ressort src dst d k_ressort, Raylib.fade blue 0.4;
             amortisseur src dst, raywhite;
             repultion src dst, red;
          ]) (Graph.linked_to l i)) 
