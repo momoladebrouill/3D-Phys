@@ -36,6 +36,7 @@ let vect_elem (xa,ya,za) (xb,yb,zb) =
     let d = dist (xa,ya,za) (xb,yb,zb) in
     ((xb-.xa)/.d,(yb-.ya)/.d,(zb-.za)/.d)
 
+let shmidtz = vect_elem zero 
 
 let normal (xa,ya,za) (xb,yb,zb) = (*calcul du vecteur unitaire normal à la droite reliant les points a et b*)
 (* actually, on calcule le produit vectoriel avec un vecteur de la troisème dimention omg

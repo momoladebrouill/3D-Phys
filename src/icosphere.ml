@@ -1,9 +1,9 @@
-
+open Maths
 let x = 0.525731112119133606
 let z = 0.850650808352039932
 let n = 0.0
 
-let vertices = [
+let vertices = [|
     (-.x, n, z);
     (x, n, z);
     (-.x, n, -.z);
@@ -16,16 +16,56 @@ let vertices = [
     (-.z, x, n);
     (z, -.x, n);
     (-.z, -.x, n)
-]
+|]
+
+
+let uniq l = 
+  let h = Hashtbl.create 100 in
+  List.iter (fun x -> Hashtbl.replace h x ()) l;
+  Hashtbl.to_seq_keys h |> List.of_seq
+
+let subdivide positions triangles =
+  let q = Array.length positions in
+  let edges = 
+    List.map (fun (i,j,k) -> [(i,j);(i,k);(j,k)] ) triangles |> List.concat |> uniq
+  in
+  (* tous les points entre les sommets i et j*)
+  let middle = Hashtbl.create 100 in
+  let newverticieslist = List.mapi
+    (fun i (a,b) ->  
+      let m = shmidtz (positions.(a) +$ positions.(b)) in
+      Hashtbl.replace middle (a,b) (q+i);
+      m) edges in
+
+  let positions = Array.concat [positions;Array.of_list newverticieslist] in
+  let triangles = 
+    List.map
+      (fun (a,b,c) -> 
+        let d = Hashtbl.find middle (a,b) in
+        let e = Hashtbl.find middle (a,c) in
+        let f = Hashtbl.find middle (b,c) in
+        [(b,d,f);(a,d,e);(c,e,f);(d,e,f)])
+    triangles |> List.concat
+  in positions, triangles
+
 
 let icosahedron = vertices
 
+
+(* axiome : un triangle est une liste de 3 indices de sommets, dans l'ordre croissant*)
 let indices_triangles = [
-(0,4,1);(0,9,4);(9,5,4);(4,5,8);(4,8,1);(8,10,1);(8,3,10);(5,3,8);(5,2,3);(2,7,3);(7,10,3);(7,6,10);(7,11,6);(11,0,6);(0,1,6);(6,1,10);(9,0,11);(9,11,2);(9,2,5);(7,2,11)
+    (0, 1, 4); (0, 4, 9); (4, 5, 9);
+    (4, 5, 8); (1, 4, 8); (1, 8, 10);
+    (3, 8, 10); (3, 5, 8); (2, 3, 5);
+    (2, 3, 7); (3, 7, 10); (6, 7, 10);
+    (6, 7, 11); (0, 6, 11); (0, 1, 6);
+    (1, 6, 10); (0, 9, 11); (2, 9, 11);
+    (2, 5, 9); (2, 7, 11)
 ]
 
-
-(* TODO : subdivide icosahedron, then normalize vertices, then return the list of triangles (triplets of vertices) *)
-
-
-let demo () = ()
+let icosphere, indices_triangles =
+  let rec aux n (positions,triangles) =
+    if n = 0 then positions,triangles
+    else aux (n-1) (subdivide positions triangles)
+  in aux 2 (icosahedron,indices_triangles)
+let n = Array.length icosphere

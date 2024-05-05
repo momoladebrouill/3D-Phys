@@ -28,8 +28,6 @@ let gaz n_anneau src dst vol center = vect_elem src.pos center *$
    ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT *. (1.0 +. foi n_anneau *. p0)) 
 
 let bilan_des_forces src i l {penche;k_ressort} =  
-  let maxix, miny = Graph.fold_left (fun (i,a) x -> min x i, max x a) (fst (Graph.random l).pos, fst (Graph.random l).pos) (Graph.map (fun x -> fst x.pos) l) in
-  let center  = (Graph.fold_left (+$) zero (Graph.map (fun x -> x.pos) l))/$ (foi n) in
    [
     (gravity +$ if penche then (5.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
    ] @
