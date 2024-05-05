@@ -27,10 +27,6 @@ let draw st =
         (r3_to_vec3 c)
         col
       in
-  let rotate (x,y,z)  angl = 
-    let x' = x *. cos angl -. y *. sin angl in
-    let y' = x *. sin angl +. y *. cos angl in
-    (x',y',z) in
   let draw_vec src f col = 
             let f = f *$ fac_newt in
             let end_force = src +$ f in 
@@ -46,7 +42,6 @@ let draw st =
   draw_cube zero_r 1.0 1.0 1.0 Color.raywhite; 
   draw_cube zero_r 10.0 1.0 10.0 Color.raywhite; 
   draw_grid 100 10.0;
-    let posa = (0, foi h)  in
     let midpos = Graph.random st.l in 
     (*draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; *)
     Graph.iteri (fun i s ->

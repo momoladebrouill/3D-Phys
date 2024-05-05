@@ -1,6 +1,8 @@
 open Constantes
 open Maths
 
+type listadj = int list array
+
 type 'a t = 'a Array.t
 let fold_left = Array.fold_left
 let mapi = Array.mapi
@@ -16,22 +18,20 @@ let ( -%) = map2 (-$)
 (* le graphe initial*)
 let initial () = 
   Array.of_list 
-    (List.map (fun (x,y,z,ind_anneau) ->  
+    (List.map (fun ((x,y,z),ind_anneau) ->  
           let r = rayon +. foi ind_anneau *. interstice in
           {
-              pos = x*.r,y,z*.r +.rayon +. interstice*.(foi rings);
+              pos = x*.r,y*.r,z*.r +.rayon +. interstice*.(foi rings);
               vit = 0.0,0.0,0.0;
               mass = mass; 
           })
        (
        List.concat 
         (List.init rings 
-          (fun ring_no -> List.init ring 
-            (fun i-> let theta = 2.0*.3.14*.(foi i)/.(foi ring) in cos theta,0.0, sin theta, ring_no)
+          (fun ring_no -> List.map (fun a-> a,ring_no) Icosphere.icosahedron)
           )
         )
        )
-      )
 
 let random l = l.(0)
 
@@ -46,7 +46,15 @@ let droite l i = l.(droite_formule i)
 (*dans mon anneau, celui en face*)
 
 (*renvoie la liste des indices des voisins*)
-let linked_to l i =
+let g = 
+  let g = Array.make 12 [] in
+  List.iter (fun (i,j,k) -> g.(i) <- j::g.(i); g.(j) <- i::g.(j); g.(i) <- k::g.(i)) 
+    Icosphere.indices_triangles;
+  g
+
+let linked_to l i = 
+  List.map (fun j -> l.(j), dist l.(i).pos l.(j).pos) g.(i) 
+(*
     List.map (fun (i,d) -> l.(i),d) begin
    let ind_anneau = i/ring in
    let d = 2.0*.(rayon +. foi ind_anneau *. interstice) *. sin (theta/.2.0)  in 
@@ -71,4 +79,4 @@ let linked_to l i =
     ring * (ind_anneau-1) + (i mod ring), interstice; 
     ring * (ind_anneau-1) + ((i+1) mod ring), c; 
     ring * (ind_anneau-1) + ((i+ring-1) mod ring), c; 
-  ] end
+  ] end*)
