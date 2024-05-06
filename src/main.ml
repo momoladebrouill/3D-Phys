@@ -4,8 +4,6 @@ open Graph
 open Force
 open Constantes
 
-
-
 type status = {
     t : int; (*temps*)
     l : point array; (*le tableau des points*)
@@ -14,9 +12,7 @@ type status = {
     cam : Camera3D.t; (*la camera*)
 }
 
-
-let couleur_fond = Color.create 0 0 100 1
-
+(*affiche les points et/ou les forces*)
 let draw st center = 
   let draw_tri a b c =
       let a,b,c = order a b c center in
@@ -50,7 +46,7 @@ let draw st center =
           List.iter (fun (f,col) -> draw_vec s.pos f col) f
 
         else if is_key_down Key.G then  (* l'accélération*)
-          draw_vec s.pos (somme_forces f) Color.orange 
+          draw_vec s.pos (somme_forces f s) Color.orange 
         else ();
 
         begin 
@@ -74,11 +70,13 @@ R pour la gravité (" ^ string_of_bool st.penche ^ ")
         ) 10 20 20 Color.raywhite;
      end_drawing ()
 
-
+(*boucle principale*)
 let rec loop st =
   let center = Graph.fold_left (+$) zero (Graph.map (fun x-> x.pos) st.l) *$ (1.0/.(foi n)) in
   if Raylib.window_should_close () then Raylib.close_window () else 
-  let integrationDomain = Domain.spawn (fun _ -> Integration.integrate {l=st.l;k_ressort = st.k_ressort;penche = st.penche;center = center}) in
+  let integrationDomain = Domain.spawn 
+    (fun _ -> Integration.integrate 
+      {l=st.l;k_ressort = st.k_ressort;penche = st.penche;center = center}) in
   let time_jumping = not (is_key_down Key.I) in
   if time_jumping || st.t mod 30 = 0 then draw st center;
   let rmed = r3_to_vec3 center in
@@ -90,7 +88,11 @@ let rec loop st =
   loop {
       t = st.t + 1;
       l = l';
-      k_ressort = max 0.0 (st.k_ressort +. let vitesse = 0.01 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
+      k_ressort = max 0.0 (st.k_ressort +. 
+          let vitesse = 0.01 in 
+          if is_key_down Key.H then vitesse 
+          else if is_key_down Key.Y then -.vitesse 
+          else 0.0);
       penche = if is_key_pressed Key.R then not st.penche else st.penche;
       cam = st.cam 
   }

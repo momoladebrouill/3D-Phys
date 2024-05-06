@@ -1,34 +1,17 @@
 open Maths
 let deep = 2 (*nombre d'iteration en detail pour la sphère ico*)
-let x = 0.525731112119133606
-let z = 0.850650808352039932
-let n = 0.0
 
-let vertices = [|
-    (-.x, n, z);
-    (x, n, z);
-    (-.x, n, -.z);
-    (x, n, -.z);
-    (n, z, x);
-    (n, z, -.x);
-    (n, -.z, x);
-    (n, -.z, -.x);
-    (z, x, n);
-    (-.z, x, n);
-    (z, -.x, n);
-    (-.z, -.x, n)
-|]
-
-
+(*renvoie la liste contenant les mêmes élèments mais de façon unique*)
 let uniq l = 
-  let h = Hashtbl.create 100 in
+  let h = Hashtbl.create 10 in
   List.iter (fun x -> Hashtbl.replace h x ()) l;
   Hashtbl.to_seq_keys h |> List.of_seq
 
 let subdivide positions triangles =
+  (*seul dieu sait maintenant comment fonctionne ce code*)
   let q = Array.length positions in
   let edges = 
-    List.map (fun (i,j,k) -> [(i,j);(i,k);(j,k)] ) triangles |> List.concat |> uniq
+    List.map (fun (i,j,k) -> [(i,j);(i,k);(j,k)]) triangles |> List.concat |> uniq
   in
   (* tous les points entre les sommets i et j*)
   let middle = Hashtbl.create 100 in
@@ -49,9 +32,15 @@ let subdivide positions triangles =
     triangles |> List.concat
   in positions, triangles
 
-
-let icosahedron = vertices
-
+let icosahedron = 
+    let x = 0.525731112119133606 in
+    let z = 0.850650808352039932 in 
+    [|
+        (-.x, 0.0, z);(x, 0.0, z);(-.x, 0.0, -.z);
+        (x, 0.0, -.z);(0.0, z, x);(0.0, z, -.x);
+        (0.0, -.z, x);(0.0, -.z, -.x);(z, x, 0.0);
+        (-.z, x, 0.0);(z, -.x, 0.0);(-.z, -.x, 0.0)
+  |]
 
 (* axiome : un triangle est une liste de 3 indices de sommets, dans l'ordre croissant*)
 let indices_triangles = [
@@ -69,4 +58,6 @@ let icosphere, indices_triangles =
     if n = 0 then positions,triangles
     else aux (n-1) (subdivide positions triangles)
   in aux deep (icosahedron,indices_triangles)
+
+(*VERY IMPORTANT*)
 let n = Array.length icosphere
