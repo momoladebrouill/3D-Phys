@@ -11,7 +11,7 @@ let to_points y y' l =
 
 let fix_floor p = 
       {
-        pos = fst p.pos,snd p.pos,  Random.float 1.1;
+        pos = fst p.pos,snd p.pos,  Random.float 0.5;
         vit = zero;
         mass = p.mass
       }

@@ -101,7 +101,7 @@ let setup () =
   if is_window_ready () then
     let camera = Camera3D.create zero_r zero_r (Vector3.create 0. 1. 0.) 45. CameraProjection.Perspective 
     in let open Camera3D in
-    set_position camera (Vector3.create 0. 2. 4.);
+    set_position camera (Vector3.create 0. 20. 40.);
     set_target camera (Vector3.create 0. 1. 0.);
     set_up camera (Vector3.create 0. 1. 0.);
     set_fovy camera 120.;

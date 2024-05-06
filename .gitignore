@@ -29,4 +29,5 @@ bin/*
 # Local OPAM switch
 */_opam/
 
-
+# vim swap files
+*.swp
