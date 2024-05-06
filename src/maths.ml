@@ -39,14 +39,27 @@ let vect_elem (xa,ya,za) (xb,yb,zb) =
 
 let shmidtz = vect_elem zero 
 
-let normal (xa,ya,za) (xb,yb,zb) = (*calcul du vecteur unitaire normal à la droite reliant les points a et b*)
-(* actually, on calcule le produit vectoriel avec un vecteur de la troisème dimention omg
-  let (x,y) = vect_elem (xa,ya) (xb,yb) in 
-  let (x0,y0,_) = cross (0.,0.,1.) (x,y,0.) in
-  vect_elem zero (x0,y0)*)
-  let d = dist (xa,ya,za) (xb,yb,zb) in
-    ((yb-.ya)/.d,(xb-.xa)/.d,(za-.zb)/.d)
-  (*if abs_f (yb -.ya) < 1.0 then (0.0,sign_f (ya-.yb)) 
-  else 
-  let c = (xb-.xa) /. (yb -. ya)
-  in vect_elem zero (sign_f (ya-.yb),c)*)
+let cross (a,b,c) (x,y,z) = (b*.z -. c*.y, c*.x -. a*.z, a*.y -. b*.x)
+
+(*l'aire d'un triangle de sommets a b c*)
+let area (a,b,c) = norme (cross (b-$a) (c-$a)) /. 2.0
+
+
+let rec order a b c center =
+  (*on veut que a b c soit dans le sens horraire*)
+  let a,b,c = a-$center, b-$center, c-$center in
+  let det = det3 a b c in
+  if det > 0.0 then a+$center,b+$center,c+$center
+  else a+$center, c+$center, b+$center
+
+
+let normal a b c center =
+  let a,b,c = order a b c center in
+  cross (b-$a) (c-$a)
+
+let volume l = 
+  (*volume d'une ellipsoide*)
+  let l = Array.map (fun x-> x.pos) l in
+  let minx,miny,minz = Array.fold_left (fun (a,b,c) (x,y,z) -> (min a x, min b y, min c z)) (max_float,max_float,max_float) l in
+  let maxx,maxy,maxz = Array.fold_left (fun (a,b,c) (x,y,z) -> (max a x, max b y, max c z)) (min_float,min_float,min_float) l in
+  4.0/.3.0 *. 3.14 *.  (maxx-.minx)*.(maxy-.miny)*.(maxz-.minz)

@@ -17,9 +17,9 @@ type status = {
 
 let couleur_fond = Color.create 0 0 100 1
 
-let draw st = 
+let draw st center = 
   let draw_tri a b c =
-      let b,c = if det3 a b c >= 0.0 then b,c else c,b in
+      let a,b,c = order a b c center in
       draw_triangle_3d  
         (r3_to_vec3 a)
         (r3_to_vec3 b)
@@ -32,59 +32,56 @@ let draw st =
              begin 
              (*draw arrow*)
             draw_line_3d (r3_to_vec3 src) (r3_to_vec3 end_force) col;
-            draw_cylinder_ex (r3_to_vec3 mid_force) (r3_to_vec3 end_force) 1.0 0.0 10  col;
+            draw_cylinder_ex (r3_to_vec3 mid_force) (r3_to_vec3 end_force) (norme f/.50.0) 0.0 10  col;
             end in
   begin_drawing ();
-  clear_background Color.black;
+  clear_background Color.darkblue;
   begin_mode_3d st.cam;
   draw_cube zero_r 1.0 1.0 1.0 Color.raywhite; 
   draw_cube zero_r 10.0 1.0 10.0 Color.raywhite; 
   draw_grid 100 10.0;
-    if is_key_down Key.S then
-    List.iter (fun (a,b,c) -> draw_tri a.pos b.pos c.pos (fade Color.red 0.5)) (surfaces st.l);
+    if is_key_down Key.Z |> not then
+    List.iter (fun (a,b,c) -> draw_tri a.pos b.pos c.pos (fade Color.green 0.5)) (surfaces st.l);
     Graph.iteri (fun i s ->
-        let f =  (bilan_des_forces s i st.l {penche = st.penche; l = st.l; k_ressort = st.k_ressort}) in
+        let f =  (bilan_des_forces s i (volume st.l) st.l {penche = st.penche;
+          l = st.l; center = center;
+          k_ressort = st.k_ressort}) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> draw_vec s.pos f col) f
 
         else if is_key_down Key.G then  (* l'accélération*)
-          draw_vec s.pos (somme_forces f) Color.orange
-          
+          draw_vec s.pos (somme_forces f) Color.orange 
+        else ();
 
-        else if not (is_key_down Key.S) then
         begin 
-            (*draw_text (string_of_int i) (px s.pos) (py s.pos) 10 Color.raywhite;*)
             List.iter (fun (posb,_) ->
                  let a  = r3_to_vec3 s.pos in
                  let b  = r3_to_vec3 posb.pos in
-                draw_line_3d a b  Color.red) (linked_to st.l i); 
-            draw_cube (r3_to_vec3 s.pos) 1.0 1.0 1.0 Color.red;
+                draw_line_3d a b  Color.orange) (linked_to st.l i); 
+            draw_cube (r3_to_vec3 s.pos) 1.0 1.0 1.0 Color.orange;
         end 
      
           ) 
       st.l;
      end_mode_3d ();
-     draw_text "Space S X arrows" 10 10 20 Color.white;
      draw_text ( 
-    "+/- pour le zoom
-    F pour le mode forces
-    Arrows pour le deplacement
-    Space pour le saut temporel
-    Q pour recentrer
-    R pour la bascule (" ^ string_of_bool st.penche ^ ")
-    " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
+    
+"F pour le mode forces
+Space pour le saut temporel
+W pour l'affichage de la surface
+R pour la gravité (" ^ string_of_bool st.penche ^ ")
+" ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
         ) 10 20 20 Color.raywhite;
      end_drawing ()
 
 
 let rec loop st =
+  let center = Graph.fold_left (+$) zero (Graph.map (fun x-> x.pos) st.l) *$ (1.0/.(foi n)) in
   if Raylib.window_should_close () then Raylib.close_window () else 
-  let integrationDomain = Domain.spawn (fun _ -> Integration.integrate {l=st.l;k_ressort = st.k_ressort;penche = st.penche}) in
+  let integrationDomain = Domain.spawn (fun _ -> Integration.integrate {l=st.l;k_ressort = st.k_ressort;penche = st.penche;center = center}) in
   let time_jumping = not (is_key_down Key.I) in
-  if time_jumping || st.t mod 30 = 0 then draw st;
-  let rmed = r3_to_vec3 ((Graph.fold_left (+$) zero (Graph.map (fun x-> x.pos) st.l)) *$ (1.0/.(foi n))) 
-  in
-  
+  if time_jumping || st.t mod 30 = 0 then draw st center;
+  let rmed = r3_to_vec3 center in
   update_camera (addr st.cam) CameraMode.Third_person;
   Vector3.set_x (Camera3D.target st.cam) (Vector3.x rmed);
   Vector3.set_y (Camera3D.target st.cam) (Vector3.y rmed);
@@ -93,7 +90,7 @@ let rec loop st =
   loop {
       t = st.t + 1;
       l = l';
-      k_ressort = max 0.0 (st.k_ressort +. let vitesse = 1.0 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
+      k_ressort = max 0.0 (st.k_ressort +. let vitesse = 0.01 in if is_key_down Key.H then vitesse else if is_key_down Key.Y then -.vitesse else 0.0);
       penche = if is_key_pressed Key.R then not st.penche else st.penche;
       cam = st.cam 
   }

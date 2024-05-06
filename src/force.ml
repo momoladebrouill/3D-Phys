@@ -7,7 +7,8 @@ type force = point * Raylib.Color.t
 type args = {
   l : point array;
   k_ressort : float;
-  penche : bool
+  penche : bool;
+  center : vec;
 }
 
 (*force elastique avec les autres *)
@@ -24,17 +25,16 @@ let amortisseur src dst =
     er *$ 
   (k_damping *. ps (src.vit -$ dst.vit) er)
 
-let gaz n_anneau src dst vol center = vect_elem src.pos center *$ 
-   ((1.0/.vol) *. (dist src.pos dst.pos) *. nRT *. (1.0 +. foi n_anneau *. p0)) 
+let gaz id vol l center= 
+    List.fold_left (+$) zero 
+      (List.map (fun (surface,norm) -> shmidtz norm*$ ((1.0/.vol) *. nRT *. surface)) 
+        (Graph.triangles_with id l center))
 
-let bilan_des_forces src i l {penche;k_ressort} =  
+let bilan_des_forces src i v l {penche;k_ressort;center} =  
    [
-    (gravity +$ if penche then (5.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
-   ] @
-   [](*
-       gaz (i/ring) src (Graph.gauche l i) volume center, green;
-       gaz (i/ring) (Graph.droite l i) src volume center, green;
-   ]*)
+    (gravity +$ if penche then (0.001,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
+    gaz i v l center, green (*pression du gaz*)
+   ]
    @ List.concat 
     (List.map (fun (dst,d) -> 
          [

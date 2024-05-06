@@ -20,7 +20,7 @@ let initial () =
     Array.map (fun ((x,y,z),ind_anneau) ->  
           let r = rayon +. foi ind_anneau *. interstice in
           {
-              pos = x*.r,y*.r,z*.r +.rayon +. interstice*.(foi rings);
+              pos = x*.r,y*.r,z*.r +.rayon +. interstice*.(foi rings+.1.0);
               vit = 0.0,0.0,0.0;
               mass = mass; 
           })
@@ -34,6 +34,12 @@ let initial () =
 
 let random l = l.(0)
 
+
+let triangles_with i l center =
+  (*renvoie la liste des aires et des vecteurs normaux des triangles voisins à i*)
+  let is_in (a,b,c) = a = i || b = i || c = i in
+  List.filter is_in Icosphere.indices_triangles
+  |> List.map (fun (i,j,k) -> area (l.(i).pos,l.(j).pos,l.(k).pos), normal l.(i).pos l.(j).pos l.(k).pos center)
 
 
 (*renvoie la liste des indices des voisins*)
