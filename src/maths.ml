@@ -1,12 +1,6 @@
+open Types
 let foi = float_of_int
 let iof = int_of_float
-type vec = float * float * float
-
-type point = {
-    pos : vec;
-    vit : vec;
-    mass : float;
-}
 
 let fst (a,_,_) = a
 let snd (_,b,_) = b
@@ -24,7 +18,8 @@ let zero_r = Raylib.Vector3.create 0.0 0.0 0.0
 
 (*dot product, fin le produit scalaire quoi*)
 let ps (a,b,c) (x,y,z) = a*.x +. b*.y +. c*.z
-(*cross product*)
+
+(*cross product, produit vectoriel*)
 let cross (a,b,c) (x,y,z) = (b*.z -. c*.y, c*.x -. a*.z, a*.y -. b*.x)
 
 let abs_f x = if x < 0.0 then -.x else x
@@ -37,24 +32,31 @@ let norme = dist zero
 let vect_elem (xa,ya,za) (xb,yb,zb) =
     let d = dist (xa,ya,za) (xb,yb,zb) in
     ((xb-.xa)/.d,(yb-.ya)/.d,(zb-.za)/.d)
+
 let shmidtz = vect_elem zero 
 
 let det3 (a,b,c) (d,e,f) (g,h,i) =
   a *. (e*.i -. h*.f) -. d*. (b*.i -. h*.c) +. g*. (b*.f -. e*.c)
+
 let rec order a b c center =
-  (*on veut que a b c soit dans le sens horraire, depuis le centre center*)
-  let a,b,c = a-$center, b-$center, c-$center in
-  let det = det3 a b c in
-  if det > 0.0 then a+$center,b+$center,c+$center
-  else a+$center, c+$center, b+$center
+  (*on veut que a b c soit dans le sens horraire, vus depuis le centre center*)
+  let det = det3 (a-$center) (b-$center) (c-$center) in
+  if det > 0.0 then a,b,c
+  else a,c,b
+
 let normal a b c center =
   let a,b,c = order a b c center in
   cross (b-$a) (c-$a)
 
+let collision (x,y,z) =
+  z  < 5.1
+
+let fix_collision (x,y,z) =
+  (x,y,5.1) 
 
 let somme_forces l p =
   let s = List.fold_left (fun x (f,_) -> x +$ f ) zero l  in
-  if trd p.pos < 0.1 then (fst s,snd s,0.0) else s
+  if collision p.pos then zero (*fst s,snd s,0.0*) else s
 
 (*l'aire d'un triangle situé sur les sommets a b c*)
 let area (a,b,c) = norme (cross (b-$a) (c-$a)) /. 2.0

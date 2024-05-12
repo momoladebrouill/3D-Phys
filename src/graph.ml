@@ -1,9 +1,7 @@
 open Constantes
 open Maths
+open Types 
 
-type listadj = int list array
-
-type 'a t = 'a Array.t
 let fold_left = Array.fold_left
 let mapi = Array.mapi
 let map = Array.map
