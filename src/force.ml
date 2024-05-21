@@ -24,7 +24,7 @@ let gaz id vol blob center=
 
 let bilan_des_forces src i v blob {penche;k_ressort;center} =  
    [
-    (gravity +$ if penche then (1.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
+    (gravity +$ if penche then (5.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
     gaz i v blob center, green (*pression du gaz*)
    ]
    @ List.concat 

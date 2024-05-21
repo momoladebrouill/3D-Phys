@@ -1,6 +1,6 @@
 open Types
 open Maths
-let deep = 2(*nombre d'iteration en detail pour la sphère ico*)
+let deep = 0(*nombre d'iteration en detail pour la sphère ico*)
 
 (*renvoie la liste contenant les mêmes élèments mais de façon unique*)
 let uniq l = 
