@@ -4,6 +4,7 @@ open Graph
 open Force
 open Types
 open Constantes
+open Integration
 
 
 (*affiche les points et/ou les forces*)

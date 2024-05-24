@@ -23,4 +23,4 @@ let c0 = 0.8  (* energie restante après un choc*)
 
 (* --- Taille du blob --- *)
 let rayon = 10.0 (* rayon de la sphère interne*)
-let n = Icosphere.n (*nombre de points sur la sphère*)
+let deep = 2(*nombre d'iteration en detail pour la sphère ico*)

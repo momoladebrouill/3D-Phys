@@ -1,7 +1,6 @@
 open Types
 open Maths
-let deep = 0(*nombre d'iteration en detail pour la sphère ico*)
-
+open Constantes
 (*renvoie la liste contenant les mêmes élèments mais de façon unique*)
 let uniq l = 
   let h = Hashtbl.create 10 in
@@ -62,3 +61,4 @@ let icosphere, indices_triangles =
 
 (*VERY IMPORTANT*)
 let n = Array.length icosphere
+

@@ -1,6 +1,7 @@
 open Maths
 open Constantes
 open Graph
+open Icosphere
 open Types
 exception Superposition of int
 
