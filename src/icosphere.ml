@@ -1,4 +1,3 @@
-open Types
 open Maths
 open Constantes
 (*renvoie la liste contenant les mêmes élèments mais de façon unique*)

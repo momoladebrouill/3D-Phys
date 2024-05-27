@@ -22,7 +22,7 @@ let gaz id vol blob center=
       (List.map (fun (surface,norm) -> shmidtz norm*$ ((1.0/.vol) *. nRT *. surface)) 
         (Graph.triangles_with id blob center))
 
-let bilan_des_forces src i v blob {penche;k_ressort;center} =  
+let bilan_des_forces src i v blob {penche;k_ressort;center;_} =  
    [
     (gravity +$ if penche then (5.0,0.0,0.0) else zero ) *$ (1.0*.src.mass), yellow; (*champs de pesanteur*) 
     gaz i v blob center, green (*pression du gaz*)

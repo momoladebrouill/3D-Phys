@@ -4,8 +4,7 @@ open Graph
 open Force
 open Types
 open Constantes
-open Integration
-
+open Icosphere
 
 (*affiche les points et/ou les forces*)
 let draw st center = 
@@ -75,12 +74,12 @@ let rec loop st =
   let time_jumping = is_key_down Key.Space in
   if not (time_jumping && st.t mod 10 <> 0) then draw st center;
   let rmed = r3_to_vec3 center in
-  (*dark magic*)
-  update_camera (addr st.cam) CameraMode.Third_person;
 
   Vector3.set_x (Camera3D.target st.cam) (Vector3.x rmed);
   Vector3.set_y (Camera3D.target st.cam) (Vector3.y rmed);
   Vector3.set_z (Camera3D.target st.cam) (Vector3.z rmed);
+  Camera3D.set_projection st.cam CameraProjection.Perspective;
+  update_camera (addr st.cam) CameraMode.Third_person;
   let blob' = Domain.join integrationDomain in
   loop {
       t = st.t + 1;
