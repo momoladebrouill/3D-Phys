@@ -1,7 +1,7 @@
 
 (*Screen*)
-let w = 16*120
-let h = 9*120
+let w = 16*110
+let h = 9*110
 let dt = 1.0/.40.0 
 let floor_y = float_of_int h (*sol*)
 
@@ -14,6 +14,6 @@ let k0 = 5e6 (*N.m6*)
 let j0 = 200.0 (*N.m-1*)
 let gravity = (1.0,9.81) (*m.s-2*)
 (*Taille du blob carré*)
-let w_blob = 8  
-let h_blob = 9
+let w_blob = 15 
+let h_blob = 10
 let n = w_blob * h_blob

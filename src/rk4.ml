@@ -31,7 +31,7 @@ let f h y y' args =
 let mult = ( *%)
 
 let rec runge_kunta args iter = if false then args.l else  
-  if iter > 10 then args.l
+  if iter > 100 then args.l
   else
   try 
       let h =  dt in
