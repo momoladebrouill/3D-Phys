@@ -1,5 +1,5 @@
 (* --- Affichage --- *)
-let fac_newt = 0.01 (*augmente la norme des vecteurs lors de l'affichage*)
+let fac_newt = 0.1 (*augmente la norme des vecteurs lors de l'affichage*)
 let w = 16*120
 let h = 9*120
 let floor_y = float_of_int h  (*La hauteur du sol, c'est la taille de l'écran par hasard*)
@@ -24,7 +24,7 @@ let p0 = 0.4 (*facteur d'augmentation de n pour chaque anneau*)
 (* --- Taille du blob --- *)
 let rayon = 100.0 (* rayon du premier anneau*)
 let rings = 3 (*nombre d'anneaux*)
-let ring = 10 (*nombre de points par anneaux*)
+let ring =20 (*nombre de points par anneaux*)
 let n = rings * ring (*nombre de points*)
 let d_eq = 2.0 *. 3.14/. (float_of_int ring) (*longeur d'equilibre des ressorts (m)*)
 let interstice = rayon/.8.0 (*distance entre deux anneaux*)

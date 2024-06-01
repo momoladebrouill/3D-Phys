@@ -14,12 +14,11 @@ type status = {
 }
 
 
-let couleur_fond = Color.create 0 0 100 1
+let couleur_fond = Color.create 0xfd 0xf6 0xe3 0xff
 
 let draw st = 
   let pxf (x,_) = (x *. st.z +. (fst st.shift)) in
   let pyf (_,y)= (y *. st.z +. (snd st.shift)) in
-  let px a = a |> pxf |> iof in 
   let py a = a |> pyf |> iof in
   let draw_tri a b c col =
       draw_triangle  
@@ -32,7 +31,9 @@ let draw st =
             let f = f *$ fac_newt in
             let end_force = src +$ f in 
              begin (*draw arrow*)
-            draw_line (px src) (py src) (px end_force) (py end_force) col;
+						 let a = Vector2.create (pxf src) (pyf src) in
+						 let b = Vector2.create (pxf end_force) (pyf end_force) in
+            draw_line_ex a b 5.0 col;
             let pi = 3.14159265359 in
             let angl = 2.0*.pi/.(norme f) in
             let dir_left = end_force -$ ((rotate f angl) *$ 0.25) in
@@ -61,8 +62,8 @@ let draw st =
             List.iter (fun (posb,_) ->
                  let a  = Vector2.create (pxf s.pos) (pyf s.pos) in
                  let b  = Vector2.create (pxf posb.pos) (pyf posb.pos) in
-                draw_line_ex a b 2.0 Color.raywhite) (linked_to st.l i); 
-            draw_circle  (px s.pos) (py s.pos) 5.0 Color.yellow;
+                draw_line_ex a b 5.0 (Color.create 0xd3 0x36 0x82 0xff)) (linked_to st.l i); 
+            ()
         end 
      
           ) 
@@ -76,7 +77,7 @@ Space pour le saut temporel
 Q pour recentrer
 R pour la bascule (" ^ string_of_bool st.penche ^ ")
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" 
-    ) 10 20 20 Color.raywhite;
+    ) 10 20 20 Color.black;
   end_drawing ()
 
 let rec loop st =
@@ -95,7 +96,7 @@ let rec loop st =
   in
   let rmed = (Array.fold_left (fun a x -> a +$ x.pos) zero st.l) *$ (1.0/.(foi n)) in
   let ideal = foi (w/2), foi (h/2) in
-  let shift' = if st.penche then (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) else shift'  in
+  let shift' = (shift' *$ 0.9) +$ ((ideal -$ rmed *$ st.z) *$ 0.1) in
   let l' = Domain.join integrationDomain in
   loop {
       t = st.t + 1;
@@ -108,8 +109,7 @@ let rec loop st =
 
 let setup () =
   Raylib.init_window w h "Blob";
-  Raylib.set_target_fps 60;
-  if is_window_ready () then
+  if is_window_ready () || true then
   {
       t = 0;
       l = Graph.initial ();
