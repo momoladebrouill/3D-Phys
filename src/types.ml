@@ -21,6 +21,7 @@ type arguments = {
 	center : vec;
 }
 
+(*état actuel de la simulation*)
 type status = {
 	blob : point graph; (*le tableau des points*)
 	t : int; (*temps*)

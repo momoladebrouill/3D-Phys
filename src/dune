@@ -1,8 +1,6 @@
 (executable 
- (name main)
- (libraries raylib)
- (modules main 
-            Maths Force Constantes 
-            Integration Graph Icosphere
-            Types)
+	(name main)
+	(libraries raylib)
+	(modules 
+		main Maths Force Constantes Integration Graph Icosphere Types)
 )

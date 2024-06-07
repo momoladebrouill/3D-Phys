@@ -45,6 +45,7 @@ let normal a b c center =
 	let a,b,c = order a b c center in
 	pv (b-$a) (c-$a)
 
+(* fonctions modifiables pour plus de détail*)
 let collision (_,_,z) =
 	z < 0.01
 
@@ -53,7 +54,7 @@ let fix_collision (x,y,_) =
 
 let somme_forces l p =
 	let s = List.fold_left (fun x (f,_) -> x +$ f ) zero l in
-	if collision p.pos then zero (*fst s,snd s,0.0*) else s
+	if collision p.pos then zero  else s
 
 (*l'aire d'un triangle situé sur les sommets a b c*)
 let area (a,b,c) = norme (pv (b-$a) (c-$a)) /. 2.0

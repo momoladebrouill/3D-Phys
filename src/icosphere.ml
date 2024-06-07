@@ -2,7 +2,7 @@ open Maths
 open Constantes
 
 (*renvoie la liste contenant les mêmes élèments mais de façon unique*)
-let uniq l = 
+let unique l = 
 	let h = Hashtbl.create 10 in
 	List.iter (fun x -> Hashtbl.replace h x ()) l;
 	Hashtbl.to_seq_keys h |> List.of_seq
@@ -10,8 +10,8 @@ let uniq l =
 let subdivide positions triangles =
 	(* rajoute du détail à une sphère de rayon 1 *)
 	let q = Array.length positions in (* nombre de points actuels *)
-	let edges = (* arrêtes a - b telles que a<b *)
-		List.map (fun (i,j,k) -> [(i,j);(i,k);(j,k)]) triangles |> List.concat |> uniq
+	let edges = (* propriété 1 : les arrêtes a --- b sont telles que a < b *)
+		List.map (fun (i,j,k) -> [(i,j);(i,k);(j,k)]) triangles |> List.concat |> unique
 	in
 	(* tous les points entre les sommets i et j*)
 	let middle = Hashtbl.create 100 in
@@ -28,12 +28,13 @@ let subdivide positions triangles =
 				let e = Hashtbl.find middle (a,c) in
 				let f = Hashtbl.find middle (b,c) in
 				(* on renvoie les 4 triangles formés par le triangle abc, 
-				 tout en conservant l'invariant *)
+				 tout en conservant la propriété 2 grâce à la propriété 1*)
 				[(b,d,f);(a,d,e);(c,e,f);(d,e,f)]
 			)
 		triangles |> List.concat
 	in positions', triangles'
 
+(*icosahèdre brut*)
 let icosahedron = 
 	let x = 0.525731112119133606 in
 	let z = 0.850650808352039932 in 
@@ -44,7 +45,7 @@ let icosahedron =
 		(-.z, x, 0.0);(z, -.x, 0.0);(-.z, -.x, 0.0)
 	|]
 
-(* Invariant : un triangle est une liste de 3 indices de sommets, dans l'ordre croissant*)
+(*Propriété 2 : un triangle est une liste de 3 indices de sommets, dans l'ordre croissant*)
 let indices_triangles = [
 	(0, 1, 4); (0, 4, 9); (4, 5, 9);
 	(4, 5, 8); (1, 4, 8); (1, 8, 10);

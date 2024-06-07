@@ -6,7 +6,7 @@ open Types
 open Constantes
 open Icosphere
 
-(*affiche les points et/ou les forces*)
+(*affiche les points ou les forces*)
 let draw st center = 
 	let draw_tri a b c =
 		let a,b,c = order a b c center in
@@ -17,43 +17,44 @@ let draw st center =
 		let end_force = src +$ f in 
 		let mid_force = src +$ (f *$ 0.75) in
 		begin 
-			(*draw arrow*)
 			draw_line_3d (r3_to_vec3 src) (r3_to_vec3 end_force) col;
-			draw_cylinder_ex (r3_to_vec3 mid_force) (r3_to_vec3 end_force) (norme f/.50.0) 0.0 10	col;
+			draw_cylinder_ex (r3_to_vec3 mid_force) (r3_to_vec3 end_force) (norme f/.50.0) 0.0 10 col;
 		end
 	in
 	begin_drawing ();
 	clear_background Color.black;
 	begin_mode_3d st.cam;
+	(* repère du 0*)
 	draw_cube zero_r 1.0 1.0 1.0 Color.raywhite; 
-	draw_cube zero_r 10.0 1.0 10.0 Color.raywhite; 
 	draw_grid 100 10.0;
 	if not (is_key_down Key.Z) then
+	(*dessin des triangles*)
 	List.iter (fun (a,b,c) -> draw_tri a.pos b.pos c.pos (fade Color.green 0.5)) (surfaces st.blob);
+	(*dessin des arrêtes*)
 	Graph.iteri 
 		(fun i s -> let f = bilan_des_forces s i (volume st.blob) st.blob 
 			{penche = st.penche;points = st.blob; center = center;k_ressort = st.k_ressort}
 			in
 			if is_key_down Key.F then (*juste les forces*)
 				List.iter (fun (f,col) -> draw_vec s.pos f col) f
-			else if is_key_down Key.G then (* l'accélération*)
+			else if is_key_down Key.G then (*l'accélération*)
 				draw_vec s.pos (somme_forces f s) Color.orange;
 				begin 
 					List.iter
 						(fun (posb,_) ->
 							let a = r3_to_vec3 s.pos in
 							let b = r3_to_vec3 posb.pos in
-							draw_line_3d a b	Color.orange)
-					(linked_to st.blob i); 
+							draw_line_3d a b Color.orange)
+					(Graph.linked_to st.blob i); 
 				end 
 		) 
 		st.blob;
 	end_mode_3d ();
 	draw_text ( 
 "F pour le mode forces
-Space pour le saut temporel
+Space pour le \"saut temporel\"
 W pour l'affichage de la surface
-R pour la gravité (" ^ string_of_bool st.penche ^ ")
+R pour pencher la surface (" ^ string_of_bool st.penche ^ ")
 " ^ string_of_float st.k_ressort ^ "N/m force de ressort elastique, modifiable avec h/y" )
 		10 20 20 Color.raywhite;
 	end_drawing ()
@@ -62,6 +63,7 @@ R pour la gravité (" ^ string_of_bool st.penche ^ ")
 let rec loop st =
 	let center = Graph.fold_left (+$) zero (Graph.map (fun x-> x.pos) st.blob) *$ (1.0/.(foi n)) in
 	if Raylib.window_should_close () then Raylib.close_window () else 
+	(*calcul du prochain état en parallèle du dessin*)
 	let integrationDomain = Domain.spawn 
 		(fun _ -> Integration.integrate 
 			{points=st.blob;k_ressort = st.k_ressort;penche = st.penche;center = center}) in
@@ -88,7 +90,7 @@ let rec loop st =
 
 let setup () =
 	Raylib.init_window w h "Blob";
-	Raylib.set_target_fps 60;
+	(*Raylib.set_target_fps 60;*)
 	if is_window_ready () then
 		let camera = Camera3D.create zero_r zero_r (Vector3.create 0. 1. 0.) 45. 
 			CameraProjection.Perspective 
@@ -109,5 +111,4 @@ let setup () =
 	else failwith "Problème de fenêtre"
 
 let () =
-	setup () |> loop;
-	Printf.printf "Nombre de points : %d \n" n
+	setup () |> loop
