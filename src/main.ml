@@ -23,7 +23,7 @@ let draw st =
     let posa = (0, foi h)  in
     draw_rectangle 0 (py posa) w (500.0*.st.z |> iof)   Color.gray; 
     Array.iteri (fun i s ->
-        let fac_newt = 0.1 in
+        let fac_newt = 0.01 in
         let f =  (bilan_des_forces s i st.l dt st.k_ressort st.penche) in
         if is_key_down Key.F then (*juste les forces*)
           List.iter (fun (f,col) -> 

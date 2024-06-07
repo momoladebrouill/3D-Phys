@@ -34,5 +34,6 @@ let linked_to i = (*to make a square*)
   let sqrt2 = sqrt 2.0 in 
   let east = [i+1,1.0; i+w_blob+1,sqrt2; i-w_blob+1,sqrt2] in
   let west = [i-1,1.0; i+w_blob-1,sqrt2; i-w_blob-1,sqrt2] in
-  let l = (i - w_blob, 1.0)::(i + w_blob, 1.0)::(if i mod w_blob =  0 then east else if i mod w_blob = w_blob-1 then west else east @ west)
+	let updown = [i - w_blob, 1.0; i + w_blob, 1.0] in
+	let l = updown @ (if i mod w_blob =  0 then east else if i mod w_blob = w_blob-1 then west else east @ west)
   in List.filter (fun (j,_) -> j >= 0 && j < n) l

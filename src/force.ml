@@ -23,12 +23,12 @@ let retour s midpoint k_ressort=
 let bilan_des_forces s i l t  k_ressort penche =
   let midpos = Array.fold_left (+$) zero (Array.map (fun x ->x.pos) l) *$ (1.0/.(foi n)) in  
    [
-    (penche*.5.0,9.81) *$ s.mass, green; (*champs de pesanteur*) 
+    gravity *$ s.mass, green; (*champs de pesanteur*) 
   ] @ List.concat 
     (List.map (fun (i,d) -> 
          [
             ressort s l.(i) (d_eq*.d) k_ressort, purple;
             amortisseur s l.(i) damping, raywhite;
-            repultion s l.(i), pink;
-            retour s midpos k_ressort, yellow;
+  (*          repultion s l.(i), pink;*)
+(*            retour s midpos k_ressort, yellow;*)
          ]) (linked_to i)) 
