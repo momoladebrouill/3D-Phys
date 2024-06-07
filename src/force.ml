@@ -24,12 +24,12 @@ let gaz id vol blob center=
 
 (*force induite par le champs gravitationnel *)
 let poids penche src =
-	(gravity +$ if penche then (5.0,0.0,0.0) else zero) *$ (1.0*.src.mass),
+	(gravity +$ if penche then (5.0,0.0,0.0) else zero) *$ (1.0*.src.mass)
 
 (*renvoie une liste de couples (force, couleur) *)
 let bilan_des_forces src i v blob {penche;k_ressort;center;_} =
 	 [
-		poids src, yellow; 
+		poids penche src, yellow; 
 		gaz i v blob center, green 
 	 ]
 	 @ List.concat 
