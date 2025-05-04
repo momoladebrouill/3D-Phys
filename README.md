@@ -1,9 +1,13 @@
 # 3D physics 
 
-Pour faire des simulations cool en 3D  
-Pour l'instant j'utilise raylib 3D mais peut être qu'a terme je ferai mon propre 3D engine
-## Objectifs :
-- déplacement dans la bas canonique
-- chute
-- ballon
+The goal was to have the basics of a 3D physics engine. 
+This project is a simulation of a soft ball, using Runge-Kutta's RK4 methode to integrate the differential equations.
+This project was made for my TIPE (Travail à Intiative Personelle Encadré).
+
+## Installing the depencies
+
+For each linux distro, it's a bit tricky, so install `nix` (available on most distros) and run `nix-shell` in this directory to install temporarly all neceserray packages, then run `make`.
+
+Thank to NixOS, *it works on my machine*, so it should work on yours to.
+
 
